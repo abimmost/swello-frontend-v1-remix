@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@300..700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "Playfair Display", serif;
+  --font-data: "Space Grotesk", sans-serif;
+
+  --color-primary: #064E3B; /* Forest Canopy Green */
+  --color-secondary: #B45309; /* Earthy Laterite */
+  --color-tertiary: #F59E0B; /* Vibrant Palm */
+  --color-background: #F9FAFB; /* Pristine Vellum */
+  --color-on-surface: #151C27;
+  --color-on-surface-variant: #404944;
+  --color-surface-container: #E7EEFE;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-sans antialiased;
+  }
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.glass-nav {
+  @apply bg-white/70 backdrop-blur-xl border border-white/20;
+}
+
+.primary-gradient {
+  background: linear-gradient(135deg, #064E3B 0%, #B45309 100%);
+}
+
+.vibrant-gradient {
+  background: linear-gradient(135deg, #064E3B 0%, #F59E0B 100%);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

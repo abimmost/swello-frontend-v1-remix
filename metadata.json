@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Swello V1",
+  "description": "Discover authentic Cameroonian recipes, plan your nutrition, and track your wellness with an editorial culinary experience.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
