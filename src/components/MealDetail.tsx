@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Bookmark, Clock, BarChart3 as BarChart, Sparkles, Calendar as CalendarToday, ChefHat, Loader2, Check } from 'lucide-react';
+import { ArrowLeft, Bookmark, Clock, BarChart3 as BarChart, Sparkles, Calendar as CalendarToday, ChefHat, Loader2, Check, Trash2 } from 'lucide-react';
 import { Recipe, Screen } from '../types';
 import { api } from '../api';
 import AddToPlanModal from './AddToPlanModal';
@@ -73,10 +73,12 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
     fetchFullRecipe();
   }, [initialRecipe.id]);
 
+  const n = recipe.nutrition || { protein: 0, fat: 0, carbs: 0 };
+
   const nutritionItems = [
-    { label: 'Protein', value: `${recipe.nutrition.protein}g`, color: 'bg-primary' },
-    { label: 'Fat', value: `${recipe.nutrition.fat}g`, color: 'bg-secondary' },
-    { label: 'Carbs', value: `${recipe.nutrition.carbs}g`, color: 'bg-tertiary' },
+    { label: 'Protein', value: `${n.protein}g`, color: 'bg-primary' },
+    { label: 'Fat', value: `${n.fat}g`, color: 'bg-secondary' },
+    { label: 'Carbs', value: `${n.carbs}g`, color: 'bg-tertiary' },
   ];
 
   const handleBookmark = async () => {
@@ -92,6 +94,21 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
 
   const handleAddToPlan = () => {
     setShowPlanModal(true);
+  };
+
+  const handleDeleteAiRecipe = async () => {
+    try {
+      setIsBookmarking(true); // Reusing this for loading state
+      const id = recipe.recipe_id || recipe.id;
+      if (id) {
+        await api.deleteRecipe(id);
+        window.dispatchEvent(new CustomEvent('bookmarks-updated')); // Trick to refresh profiles
+        onBack();
+      }
+    } catch (err) {
+      console.error(err);
+      setIsBookmarking(false);
+    }
   };
 
   return (
@@ -116,11 +133,11 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
             <ArrowLeft size={24} />
           </button>
           <button 
-            onClick={handleBookmark}
-            disabled={isBookmarking}
-            className={`w-11 h-11 backdrop-blur-xl rounded-full flex items-center justify-center transition-all active:scale-95 disabled:opacity-50 ${isBookmarked ? 'bg-primary text-white shadow-lg scale-105' : 'bg-white/50 text-primary'}`}
+            onClick={recipe.is_ai_generated ? undefined : handleBookmark}
+            disabled={isBookmarking || recipe.is_ai_generated}
+            className={`w-11 h-11 backdrop-blur-xl rounded-full flex items-center justify-center transition-all ${recipe.is_ai_generated ? 'bg-surface-container text-on-surface-variant/40 cursor-not-allowed opacity-50 grayscale' : isBookmarked ? 'bg-primary text-white shadow-lg scale-105 active:scale-95' : 'bg-white/50 text-primary active:scale-95 disabled:opacity-50'}`}
           >
-            {isBookmarking ? <Loader2 className="animate-spin" size={20} /> : <Bookmark size={22} fill={isBookmarked ? "currentColor" : "none"} />}
+            {isBookmarking ? <Loader2 className="animate-spin" size={20} /> : <Bookmark size={22} fill={!recipe.is_ai_generated && isBookmarked ? "currentColor" : "none"} />}
           </button>
         </div>
       </section>
@@ -324,12 +341,21 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
             <CalendarToday size={20} />
             Add to Plan
           </button>
-          <button 
-            onClick={() => onNavigate('editor')}
-            className="w-14 h-14 bg-white text-primary rounded-full flex items-center justify-center active:scale-95 transition-all shadow-md border border-surface-container"
-          >
-            <Sparkles size={24} fill="currentColor" className="text-primary" />
-          </button>
+          {recipe.is_ai_generated ? (
+            <button 
+              onClick={handleDeleteAiRecipe}
+              className="w-14 h-14 bg-error-container text-error rounded-full flex items-center justify-center active:scale-95 transition-all shadow-md border border-error/20"
+            >
+              <Trash2 size={24} />
+            </button>
+          ) : (
+            <button 
+              onClick={() => onNavigate('editor')}
+              className="w-14 h-14 bg-white text-primary rounded-full flex items-center justify-center active:scale-95 transition-all shadow-md border border-surface-container"
+            >
+              <Sparkles size={24} fill="currentColor" className="text-primary" />
+            </button>
+          )}
         </div>
       </div>
 

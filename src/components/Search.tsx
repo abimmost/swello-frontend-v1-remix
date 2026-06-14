@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Recipe } from '../types';
 import { api } from '../api';
 import AddToPlanModal from './AddToPlanModal';
+import { getScoreColor } from '../utils';
 
 interface SearchScreenProps {
   onSelectRecipe: (recipe: Recipe) => void;
@@ -162,12 +163,6 @@ export default function SearchScreen({ onSelectRecipe }: SearchScreenProps) {
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score <= 40) return 'bg-[#78350f]'; // Brown
-    if (score <= 69) return 'bg-tertiary'; // Orange
-    return 'bg-primary'; // Green
-  };
-
   return (
     <div className="min-h-screen pb-32 bg-background">
       {/* Header */}
@@ -320,6 +315,11 @@ export default function SearchScreen({ onSelectRecipe }: SearchScreenProps) {
                   <div className="absolute top-4 left-4 flex flex-col gap-2">
                     <span className={`${getScoreColor(recipe.score)} text-white px-3 py-1 rounded-full font-bold text-[11px] shadow-lg`}>{recipe.score}/100</span>
                   </div>
+                  {recipe.is_ai_generated && (
+                    <div className="absolute bottom-4 right-4 bg-black/60 text-white px-2 py-0.5 rounded-md text-[10px] font-bold backdrop-blur-md uppercase tracking-widest border border-white/20">
+                      AI
+                    </div>
+                  )}
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();

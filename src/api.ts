@@ -32,6 +32,14 @@ export const api = {
     if (!res.ok) throw new Error('Failed to fetch profile');
     return res.json();
   },
+  getUserRecipes: async () => {
+    const res = await fetch(`${BASE_URL}/users/me/recipes`, { headers: await getHeaders() });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Failed to fetch user recipes');
+    }
+    return res.json();
+  },
   updateProfile: async (data: { display_name?: string; avatar_url?: string }) => {
     const res = await fetch(`${BASE_URL}/users/me`, {
       method: 'PATCH',
@@ -93,6 +101,17 @@ export const api = {
     }
     return res.json();
   },
+  deleteRecipe: async (id: string) => {
+    const res = await fetch(`${BASE_URL}/recipes/${id}`, {
+      method: 'DELETE',
+      headers: await getHeaders(),
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Failed to delete recipe');
+    }
+    return res.json();
+  },
   createRecipe: async (data: any) => {
     const res = await fetch(`${BASE_URL}/recipes`, {
       method: 'POST',
@@ -147,6 +166,18 @@ export const api = {
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.detail || 'Failed to delete planned meal');
+    }
+    return res.json();
+  },
+  updatePlannedMealStatus: async (planId: string, status: string) => {
+    const res = await fetch(`${BASE_URL}/meal-plan/${planId}/status`, {
+      method: 'PATCH',
+      headers: await getHeaders(),
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Failed to update planned meal status');
     }
     return res.json();
   },

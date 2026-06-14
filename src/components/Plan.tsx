@@ -51,16 +51,27 @@ export default function Plan() {
     }
   }, []);
 
-  // Save completed status to localStorage
-  const toggleMealComplete = (id: string) => {
+  // Save completed status to localStorage and API
+  const toggleMealComplete = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'prepared' ? 'pending' : 'prepared';
+    
+    // Optimistic UI update
     const newSet = new Set(completedMealIds);
-    if (newSet.has(id)) {
-      newSet.delete(id);
-    } else {
+    if (newStatus === 'prepared') {
       newSet.add(id);
+    } else {
+      newSet.delete(id);
     }
     setCompletedMealIds(newSet);
     localStorage.setItem('swello-completed-meals', JSON.stringify(Array.from(newSet)));
+
+    // API call
+    try {
+      await api.updatePlannedMealStatus(id, newStatus);
+    } catch (err) {
+      console.error('Failed to update status', err);
+      // Revert optimistic update on failure (optional, won't add here for simplicity)
+    }
   };
 
   // Date Logic
@@ -302,13 +313,18 @@ export default function Plan() {
                             className="bg-white rounded-3xl p-5 flex gap-5 items-center shadow-xl shadow-black/[0.02] border border-surface-container/30 relative overflow-hidden group"
                           >
                             <div className="absolute top-0 left-0 w-1.5 h-full bg-primary/20 group-hover:bg-primary transition-colors" />
-                            <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 shadow-md">
+                            <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 shadow-md relative">
                               <img 
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                                 referrerPolicy="no-referrer" 
                                 src={meal?.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800'} 
                                 alt={meal?.title} 
                               />
+                              {pm.recipes?.is_ai_generated && (
+                                <div className="absolute bottom-1 right-1 bg-black/60 text-white px-1.5 py-0.5 rounded-md text-[8px] font-bold backdrop-blur-md uppercase tracking-widest border border-white/20">
+                                  AI
+                                </div>
+                              )}
                             </div>
                             <div className="flex-grow">
                               <div className="flex justify-between items-start mb-1">
@@ -322,12 +338,12 @@ export default function Plan() {
                                      </span>
                                    )}
                                    <button 
-                                     onClick={() => toggleMealComplete(pm.id)}
-                                     className={`${completedMealIds.has(pm.id) ? 'text-primary' : 'text-on-surface-variant/20'} hover:scale-110 transition-all`}
+                                     onClick={() => toggleMealComplete(pm.id, pm.status || (completedMealIds.has(pm.id) ? 'prepared' : 'pending'))}
+                                     className={`${pm.status === 'prepared' || completedMealIds.has(pm.id) ? 'text-primary' : 'text-on-surface-variant/20'} hover:scale-110 transition-all`}
                                    >
                                      <CheckCircle 
                                        size={18} 
-                                       fill={completedMealIds.has(pm.id) ? "currentColor" : "none"} 
+                                       fill={pm.status === 'prepared' || completedMealIds.has(pm.id) ? "currentColor" : "none"} 
                                        className="transition-all" 
                                      />
                                    </button>

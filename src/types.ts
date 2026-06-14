@@ -17,6 +17,7 @@ export interface Recipe {
   budget: 'Budget-friendly' | 'Mid-range' | 'Premium';
   score: number;
   tags: string[];
+  is_ai_generated?: boolean;
   nutrition: {
     protein: number;
     fat: number;
@@ -30,4 +31,4 @@ export interface Recipe {
   cookware?: string[];
 }
 
-export type Screen = 'onboarding' | 'discovery' | 'search' | 'detail' | 'plan' | 'profile' | 'editor' | 'breakdown' | 'add-ingredients';
+export type Screen = 'onboarding' | 'discovery' | 'search' | 'detail' | 'plan' | 'profile' | 'editor' | 'breakdown' | 'add-ingredients' | 'your-recipes';

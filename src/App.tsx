@@ -17,6 +17,7 @@ import SearchScreen from './components/Search';
 import MealDetail from './components/MealDetail';
 import Plan from './components/Plan';
 import Profile from './components/Profile';
+import YourRecipesList from './components/YourRecipesList';
 import NutrientBreakdown from './components/NutrientBreakdown';
 import AIEditor from './components/AIEditor';
 import AddRecipeIngredients from './components/AddRecipeIngredients';
@@ -118,10 +119,22 @@ export default function App() {
       if (e.type === 'navigate-search') {
         setCurrentScreen('search');
         setNavigationHistory(prev => [...prev, 'search']);
+      } else if (e.type === 'navigate') {
+        const screen = e.detail;
+        setCurrentScreen(screen);
+        setNavigationHistory(prev => [...prev, screen]);
+      } else if (e.type === 'select-recipe') {
+        handleSelectRecipe(e.detail);
       }
     };
     window.addEventListener('navigate-search' as any, handleGlobalNav);
-    return () => window.removeEventListener('navigate-search' as any, handleGlobalNav);
+    window.addEventListener('navigate' as any, handleGlobalNav);
+    window.addEventListener('select-recipe' as any, handleGlobalNav);
+    return () => {
+      window.removeEventListener('navigate-search' as any, handleGlobalNav);
+      window.removeEventListener('navigate' as any, handleGlobalNav);
+      window.removeEventListener('select-recipe' as any, handleGlobalNav);
+    };
   }, []);
 
   const handleNavigate = (screen: Screen) => {
@@ -198,7 +211,7 @@ export default function App() {
 
       <AnimatePresence mode="wait">
         {/* Layered screens (Not pre-loaded) */}
-        {['onboarding', 'detail', 'breakdown', 'editor', 'add-ingredients'].includes(currentScreen) && (
+        {['onboarding', 'detail', 'breakdown', 'editor', 'add-ingredients', 'your-recipes'].includes(currentScreen) && (
           <motion.div
             key={currentScreen}
             initial={{ opacity: 0, x: 20 }}
@@ -209,6 +222,13 @@ export default function App() {
           >
             {currentScreen === 'onboarding' && (
               <Onboarding onStart={handleNavigate} />
+            )}
+
+            {currentScreen === 'your-recipes' && (
+              <YourRecipesList 
+                onBack={handleBack} 
+                onSelectRecipe={handleSelectRecipe}
+              />
             )}
 
             {currentScreen === 'detail' && (

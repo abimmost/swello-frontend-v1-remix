@@ -210,6 +210,12 @@ export default function DiscoveryFeed({ onSelectRecipe, onNavigate }: DiscoveryF
                       <Clock size={14} className="text-on-surface-variant" />
                       <span className="text-xs font-data font-bold">{recipe.time}</span>
                     </div>
+
+                    {recipe.is_ai_generated && (
+                      <div className="absolute bottom-3 right-3 bg-black/60 text-white px-2 py-0.5 rounded-md text-[10px] font-bold backdrop-blur-md uppercase tracking-widest border border-white/20">
+                        AI
+                      </div>
+                    )}
                     
                     <button 
                       onClick={(e) => {

@@ -3,16 +3,21 @@ import { Settings, ArrowRight, Loader2, LogOut } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { api } from '../api';
 import { getSupabase } from '../lib/supabase';
+import { getScoreColor } from '../utils';
 
 export default function Profile() {
   const [profile, setProfile] = useState<any>(null);
   const [bookmarks, setBookmarks] = useState<any[]>([]);
+  const [editedRecipes, setEditedRecipes] = useState<any[]>([]);
   const [nutritionBalance, setNutritionBalance] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [refreshKey, setRefreshKey] = useState(0);
   const [silentLoading, setSilentLoading] = useState(false);
+
+  // Expose onNavigate globally if props needed OR use an event
+  // but Profile is rendered inside App. We should add onNavigate to Profile props.
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,13 +27,15 @@ export default function Profile() {
 
         setError(null);
         const today = new Date().toISOString().split('T')[0];
-        const [profileData, bookmarksData, mealPlanData] = await Promise.all([
+        const [profileData, bookmarksData, mealPlanData, recipesData] = await Promise.all([
           api.getMe(),
           api.getBookmarks(),
-          api.getMealPlan(today, today)
+          api.getMealPlan(today, today),
+          api.getUserRecipes().catch(() => [])
         ]);
         setProfile(profileData);
         setBookmarks(bookmarksData);
+        setEditedRecipes(recipesData || []);
         setNutritionBalance(mealPlanData.weekly_nutrition_balance);
       } catch (err: any) {
         console.error(err);
@@ -80,9 +87,9 @@ export default function Profile() {
           {silentLoading && <Loader2 size={16} className="animate-spin text-primary opacity-50" />}
           <button 
             onClick={handleLogout}
-            className="text-on-surface-variant hover:text-error transition-colors"
+            className="text-on-surface-variant hover:text-error transition-all duration-300 hover:scale-110 active:scale-95"
           >
-            <LogOut size={22} />
+            <LogOut size={22} className="hover:-rotate-12 transition-transform duration-300" />
           </button>
           <Settings className="text-primary cursor-pointer hover:rotate-90 transition-transform duration-500" size={24} />
         </div>
@@ -118,7 +125,6 @@ export default function Profile() {
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-surface-container/30">
           <div className="flex justify-between items-baseline mb-8">
             <h3 className="font-headline text-2xl text-secondary font-bold">Today's Nutrition</h3>
-            <span className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Live Data</span>
           </div>
           
           <div className="space-y-6 mb-8">
@@ -147,41 +153,63 @@ export default function Profile() {
           </div>
         </section>
 
-        {/* My Recipes Section */}
+        {/* Your Recipes Section */}
         <section>
-          <h3 className="font-headline text-2xl text-secondary font-bold mb-6">Saved Recipes</h3>
-          {bookmarks.length > 0 ? (
+          <h3 className="font-headline text-2xl text-secondary font-bold mb-6">Your Recipes</h3>
+          {(bookmarks.length > 0 || editedRecipes.length > 0) ? (
             <div className="grid grid-cols-2 gap-4">
-              {bookmarks.slice(0, 4).map((bookmark: any) => {
-                const recipeRaw = bookmark.recipes || bookmark.recipe || {};
+              {[...editedRecipes, ...bookmarks].slice(0, 4).map((item: any, i: number) => {
+                const recipeRaw = item.recipes || item.recipe || item;
                 const recipe = Array.isArray(recipeRaw) ? (recipeRaw[0] || {}) : recipeRaw;
-                const mealRaw = recipe.meals || recipe.meal || {};
+                const mealRaw = recipe.meals || recipe.meal || item.meals || item.meal || recipe;
                 const meal = Array.isArray(mealRaw) ? (mealRaw[0] || {}) : mealRaw;
 
                 return (
-                  <div key={bookmark.recipe_id} className="space-y-3">
+                  <div 
+                    key={`${recipe.id || meal.id}-${i}`} 
+                    className="space-y-3 cursor-pointer group"
+                    onClick={() => {
+                        window.dispatchEvent(new CustomEvent('select-recipe', { detail: recipe }));
+                    }}
+                  >
                     <div className="aspect-square rounded-2xl overflow-hidden bg-surface-container relative shadow-lg">
                       <img 
-                        className="w-full h-full object-cover" 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                         referrerPolicy="no-referrer" 
-                        src={meal?.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800'} 
-                        alt={meal?.title} 
+                        src={meal?.image_url || recipe?.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800'} 
+                        alt={meal?.title || recipe?.name} 
                       />
-                      <div className="absolute bottom-4 left-4 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-data font-bold text-primary">
-                        {meal?.balanced_level_score || 0}/100
+                      <div className={`absolute bottom-4 left-4 ${getScoreColor(meal?.balanced_level_score || recipe?.score || 0)} text-white px-3 py-1.5 rounded-xl text-xs font-data font-bold shadow-md border border-white/10`}>
+                        {meal?.balanced_level_score || recipe?.score || 0}/100
                       </div>
+                      {recipe?.is_ai_generated && (
+                        <div className="absolute bottom-4 right-4 bg-black/60 text-white px-2 py-0.5 rounded-md text-[10px] font-bold backdrop-blur-md uppercase tracking-widest border border-white/20">
+                          AI
+                        </div>
+                      )}
                     </div>
-                    <p className="font-headline text-lg text-on-surface font-bold truncate">{meal?.title || 'Untitled'}</p>
+                    <p className="font-headline text-lg text-on-surface font-bold truncate group-hover:text-primary transition-colors">{meal?.title || recipe?.name || 'Untitled'}</p>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <p className="text-on-surface-variant italic text-center py-10 bg-surface-container/20 rounded-3xl border border-dashed">No saved recipes yet.</p>
+            <div className="text-center py-10 bg-surface-container/20 rounded-3xl border border-dashed flex flex-col items-center gap-4">
+              <p className="text-on-surface-variant italic">No cooked or saved recipes yet.</p>
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }))}
+                className="px-6 py-2 rounded-xl bg-primary text-white font-bold text-sm shadow-md transition-all active:scale-95"
+              >
+                Add Recipe
+              </button>
+            </div>
           )}
-          {bookmarks.length > 0 && (
-            <button className="flex items-center mt-8 text-primary font-bold text-sm hover:translate-x-1 transition-transform">
-              View all {bookmarks.length} saved recipes
+          {(bookmarks.length + editedRecipes.length) > 4 && (
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'your-recipes' }))}
+              className="flex items-center mt-8 text-primary font-bold text-sm hover:translate-x-1 transition-transform"
+            >
+              View all {bookmarks.length + editedRecipes.length} your recipes
               <ArrowRight size={16} className="ml-1" />
             </button>
           )}
