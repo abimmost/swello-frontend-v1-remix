@@ -367,20 +367,20 @@ export default function AIEditor({ recipe: initialRecipe, onBack }: AIEditorProp
               </div>
             </div>
             <div className="w-2/5 bg-surface-container shadow-sm border border-surface-container-high rounded-3xl p-5 flex flex-col justify-between">
-              <div>
+                <div>
                 <span className="text-[9px] uppercase font-bold tracking-[0.2em] text-on-surface-variant opacity-60">Macro Shift</span>
                 <div className="mt-3 flex flex-col gap-2">
                   <div className="space-y-1">
                     <div className="h-1.5 w-full bg-white rounded-full border border-black/5">
-                      <div className="h-full bg-primary" style={{ width: `${aiResponse.macro_shift?.protein_pct || 30}%` }} />
+                      <div className="h-full bg-primary" style={{ width: `${aiResponse.test_macros?.protein_percentage || aiResponse.macro_shift?.protein_percentage || 30}%` }} />
                     </div>
-                    <span className="text-[9px] font-bold font-data text-primary">PRO {aiResponse.macro_shift?.protein_pct || '??'}%</span>
+                    <span className="text-[9px] font-bold font-data text-primary">PRO {aiResponse.test_macros?.protein_percentage || aiResponse.macro_shift?.protein_percentage || '??'}%</span>
                   </div>
                   <div className="space-y-1">
                     <div className="h-1.5 w-full bg-white rounded-full border border-black/5">
-                      <div className="h-full bg-secondary" style={{ width: `${aiResponse.macro_shift?.fat_pct || 50}%` }} />
+                      <div className="h-full bg-secondary" style={{ width: `${aiResponse.test_macros?.fat_percentage || aiResponse.macro_shift?.fat_percentage || 50}%` }} />
                     </div>
-                    <span className="text-[9px] font-bold font-data text-secondary">FAT {aiResponse.macro_shift?.fat_pct || '??'}%</span>
+                    <span className="text-[9px] font-bold font-data text-secondary">FAT {aiResponse.test_macros?.fat_percentage || aiResponse.macro_shift?.fat_percentage || '??'}%</span>
                   </div>
                 </div>
               </div>

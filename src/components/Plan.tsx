@@ -36,6 +36,32 @@ export default function Plan() {
   const [mealPlan, setMealPlan] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [silentLoading, setSilentLoading] = useState(false);
+  const [completedMealIds, setCompletedMealIds] = useState<Set<string>>(new Set());
+
+  // Load completed status from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('swello-completed-meals');
+    if (saved) {
+      try {
+        setCompletedMealIds(new Set(JSON.parse(saved)));
+      } catch (e) {
+        console.error('Failed to parse completed meals', e);
+      }
+    }
+  }, []);
+
+  // Save completed status to localStorage
+  const toggleMealComplete = (id: string) => {
+    const newSet = new Set(completedMealIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setCompletedMealIds(newSet);
+    localStorage.setItem('swello-completed-meals', JSON.stringify(Array.from(newSet)));
+  };
 
   // Date Logic
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
@@ -86,7 +112,9 @@ export default function Plan() {
   useEffect(() => {
     const fetchPlan = async () => {
       try {
-        setLoading(true);
+        if (!mealPlan) setLoading(true);
+        else setSilentLoading(true);
+
         const end = new Date(currentWeekStart);
         end.setDate(currentWeekStart.getDate() + 6);
         const data = await api.getMealPlan(
@@ -98,6 +126,7 @@ export default function Plan() {
         setError(err.message);
       } finally {
         setLoading(false);
+        setSilentLoading(false);
       }
     };
 
@@ -125,6 +154,7 @@ export default function Plan() {
       <header className="bg-white/70 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 border-b border-surface-container/30">
         <h1 className="font-headline text-2xl text-secondary font-bold">Plan</h1>
         <div className="flex items-center gap-4">
+          {silentLoading && <Loader2 size={16} className="animate-spin text-primary opacity-50" />}
           <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest opacity-60 hidden sm:block">
             {weekRangeLabel}
           </span>
@@ -291,8 +321,15 @@ export default function Plan() {
                                        {extractTime(pm.scheduled_date)}
                                      </span>
                                    )}
-                                   <button className="text-primary hover:scale-110 transition-transform">
-                                     <CheckCircle size={18} fill="currentColor" className="opacity-20 hover:opacity-100 transition-opacity" />
+                                   <button 
+                                     onClick={() => toggleMealComplete(pm.id)}
+                                     className={`${completedMealIds.has(pm.id) ? 'text-primary' : 'text-on-surface-variant/20'} hover:scale-110 transition-all`}
+                                   >
+                                     <CheckCircle 
+                                       size={18} 
+                                       fill={completedMealIds.has(pm.id) ? "currentColor" : "none"} 
+                                       className="transition-all" 
+                                     />
                                    </button>
                                 </div>
                               </div>

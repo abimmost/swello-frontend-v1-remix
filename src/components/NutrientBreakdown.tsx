@@ -1,6 +1,8 @@
 import { motion } from 'motion/react';
-import { ArrowLeft, Share2, Info, PlusCircle } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Loader2 } from 'lucide-react';
 import { Recipe } from '../types';
+import { useState } from 'react';
+import { api } from '../api';
 
 interface NutrientBreakdownProps {
   recipe: Recipe;
@@ -8,14 +10,37 @@ interface NutrientBreakdownProps {
 }
 
 export default function NutrientBreakdown({ recipe, onBack }: NutrientBreakdownProps) {
+  const [isLogging, setIsLogging] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
+
+  const n = recipe.nutrition || { protein: 0, fat: 0, carbs: 0, fiber: 0, iron: 0, vitC: 0 };
+
   const breakdown = [
-    { label: 'Protein', value: '28g', dv: '56%', color: 'bg-primary', note: '"~1 palm worth"' },
-    { label: 'Carbohydrates', value: '42g', dv: '14%', color: 'bg-secondary', note: '"~2 fists worth"' },
-    { label: 'Dietary Fat', value: '18g', dv: '23%', color: 'bg-secondary', note: '"~1 small handful"' },
-    { label: 'Fiber', value: '6g', dv: '24%', color: 'bg-primary/40', note: '"~1 pinch"' },
-    { label: 'Iron', value: '4.2mg', dv: '23%', color: 'bg-primary/30' },
-    { label: 'Vitamin C', value: '12mg', dv: '13%', color: 'bg-primary/20' },
+    { label: 'Protein', value: `${n.protein}g`, dv: `${Math.round((n.protein / 50) * 100)}%`, color: 'bg-primary' },
+    { label: 'Carbohydrates', value: `${n.carbs}g`, dv: `${Math.round((n.carbs / 275) * 100)}%`, color: 'bg-secondary' },
+    { label: 'Dietary Fat', value: `${n.fat}g`, dv: `${Math.round((n.fat / 78) * 100)}%`, color: 'bg-secondary' },
+    { label: 'Fiber', value: `${n.fiber}g`, dv: `${Math.round((n.fiber / 28) * 100)}%`, color: 'bg-primary/40' },
+    { label: 'Iron', value: `${n.iron}mg`, dv: `${Math.round((n.iron / 18) * 100)}%`, color: 'bg-primary/30' },
+    { label: 'Vitamin C', value: `${n.vitC}mg`, dv: `${Math.round((n.vitC / 90) * 100)}%`, color: 'bg-primary/20' },
   ];
+
+  const handleLogMeal = async () => {
+    try {
+      setIsLogging(true);
+      const today = new Date().toISOString().split('T')[0];
+      await api.addPlannedMeal({
+        meal_id: recipe.meal_id || recipe.id,
+        scheduled_date: today,
+        scheduled_time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+      });
+      setIsLogged(true);
+      setTimeout(() => setIsLogged(false), 3000);
+    } catch (err) {
+      console.error('Failed to log meal:', err);
+    } finally {
+      setIsLogging(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -57,9 +82,9 @@ export default function NutrientBreakdown({ recipe, onBack }: NutrientBreakdownP
 
           <div className="flex flex-wrap justify-center gap-3 mt-10">
             {[
-              { label: 'Protein: Good', type: 'success' },
-              { label: 'Carbs: High', type: 'warning' },
-              { label: 'Fats: Balanced', type: 'success' },
+              { label: `Protein: ${n.protein > 20 ? 'Good' : 'Low'}`, type: n.protein > 20 ? 'success' : 'warning' },
+              { label: `Carbs: ${n.carbs > 100 ? 'High' : 'Balanced'}`, type: n.carbs > 100 ? 'warning' : 'success' },
+              { label: `Fats: ${n.fat < 30 ? 'Balanced' : 'High'}`, type: n.fat < 30 ? 'success' : 'warning' },
             ].map((badge) => (
               <div 
                 key={badge.label}
@@ -90,44 +115,21 @@ export default function NutrientBreakdown({ recipe, onBack }: NutrientBreakdownP
                     className={`h-full ${item.color} rounded-full`}
                   />
                 </div>
-                {item.note && <p className="text-[10px] font-bold text-on-surface-variant opacity-50 uppercase tracking-widest">{item.note}</p>}
               </div>
             ))}
-          </div>
-        </section>
-
-        {/* Daily Tracking */}
-        <section className="space-y-6 pb-12">
-          <h2 className="font-headline text-2xl font-bold text-primary">Daily Tracking</h2>
-          <div className="bg-white p-6 rounded-3xl space-y-5 border border-surface-container/30 shadow-sm">
-            <div className="flex items-center gap-3">
-              <CalendarIcon size={20} className="text-primary" />
-              <span className="text-sm font-semibold">Meals logged today: 2</span>
-            </div>
-            <div className="space-y-3">
-              <div className="h-6 w-full bg-surface-container rounded-lg flex overflow-hidden shadow-inner">
-                <div className="h-full bg-primary" style={{ width: '40%' }} />
-                <div className="h-full bg-secondary" style={{ width: '45%' }} />
-                <div className="h-full bg-on-surface-variant/40" style={{ width: '15%' }} />
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[11px] font-bold text-on-surface-variant opacity-60">Daily Goal: 65% complete</span>
-                <div className="flex gap-2">
-                  <span className="text-[10px] font-bold text-primary">P</span>
-                  <span className="text-[10px] font-bold text-secondary">C</span>
-                  <span className="text-[10px] font-bold text-on-surface-variant">F</span>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
       </main>
 
       {/* Fixed Bottom Button */}
       <div className="fixed bottom-0 left-0 w-full p-6 bg-white/70 backdrop-blur-xl border-t border-surface-container/30 z-50">
-        <button className="w-full primary-gradient text-white py-4 rounded-xl font-bold shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-          <PlusCircle size={20} />
-          Log This Meal Today
+        <button 
+          onClick={handleLogMeal}
+          disabled={isLogging || isLogged}
+          className="w-full primary-gradient text-white py-4 rounded-xl font-bold shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {isLogging ? <Loader2 className="animate-spin" size={20} /> : isLogged ? <PlusCircle size={20} className="text-white" /> : <PlusCircle size={20} />}
+          {isLogging ? 'Logging...' : isLogged ? 'Logged Successfully!' : 'Log This Meal Today'}
         </button>
       </div>
     </div>

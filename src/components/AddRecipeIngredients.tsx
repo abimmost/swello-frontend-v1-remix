@@ -1,16 +1,55 @@
-import { ArrowLeft, Check, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Check, Edit2, Trash2, ArrowBigDown } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useState } from 'react';
 
 interface AddRecipeIngredientsProps {
   onBack: () => void;
 }
 
 export default function AddRecipeIngredients({ onBack }: AddRecipeIngredientsProps) {
-  const currentIngredients = [
-    { emoji: '🌿', name: 'Ndolé leaves', quantity: '2', unit: 'large handfuls', metric: '≈ 200g' },
-    { emoji: '🥜', name: 'Ground crayfish', quantity: '1', unit: 'small palm', metric: '≈ 30g' },
-    { emoji: '🧅', name: 'Onion', quantity: '1', unit: 'medium bulb', metric: '≈ 120g' },
-  ];
+  const [ingredients, setIngredients] = useState<any[]>([
+    { emoji: '🌿', name: 'Ndolé leaves', quantity: '2', unit: 'large handfuls', metric: '≈ 200g', isEssential: true },
+    { emoji: '🥜', name: 'Ground crayfish', quantity: '1', unit: 'small palm', metric: '≈ 30g', isEssential: false },
+    { emoji: '🧅', name: 'Onion', quantity: '1', unit: 'medium bulb', metric: '≈ 120g', isEssential: false },
+  ]);
+
+  const [newName, setNewName] = useState('');
+  const [newQty, setNewQty] = useState('');
+  const [newUnit, setNewUnit] = useState('large handful');
+  const [isEssential, setIsEssential] = useState(false);
+
+  const handleAddIngredient = () => {
+    if (!newName) return;
+    const icons: Record<string, string> = {
+        'Ndole': '🌿',
+        'Tomato': '🍅',
+        'Onion': '🧅',
+        'Garlic': '🧄',
+        'Crayfish': '🥜',
+        'Beef': '🥩',
+        'Chicken': '🍗',
+        'Yam': '🥔',
+        'Plantain': '🍌',
+    };
+    const emoji = Object.entries(icons).find(([k]) => newName.toLowerCase().includes(k.toLowerCase()))?.[1] || '🥘';
+
+    setIngredients([...ingredients, {
+      emoji,
+      name: newName,
+      quantity: newQty,
+      unit: newUnit,
+      metric: `~ ${Math.floor(Math.random() * 100 + 10)}g`,
+      isEssential
+    }]);
+
+    setNewName('');
+    setNewQty('');
+    setIsEssential(false);
+  };
+
+  const removeIngredient = (index: number) => {
+    setIngredients(ingredients.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col pb-48">
@@ -39,24 +78,11 @@ export default function AddRecipeIngredients({ onBack }: AddRecipeIngredientsPro
 
         <h2 className="font-headline text-3xl font-bold text-secondary mb-8 leading-tight">Add Ingredients</h2>
 
-        {/* Measurement Mode Toggle */}
-        <div className="flex items-center justify-between mb-10 bg-white p-2 rounded-2xl shadow-sm border border-surface-container/30">
-          <span className="text-xs font-bold text-on-surface-variant ml-4 uppercase tracking-widest opacity-40">Mode:</span>
-          <div className="flex gap-1">
-            <button className="px-6 py-2.5 rounded-xl bg-primary text-white font-bold text-xs shadow-md transition-all">
-              Estimates
-            </button>
-            <button className="px-6 py-2.5 rounded-xl text-on-surface-variant font-bold text-xs hover:bg-surface-container/50 transition-all">
-              Metric
-            </button>
-          </div>
-        </div>
-
         {/* Added Ingredients List */}
         <div className="space-y-4 mb-14">
-          {currentIngredients.map((ing, i) => (
+          {ingredients.map((ing, i) => (
             <motion.div 
-                key={ing.name}
+                key={`${ing.name}-${i}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
@@ -71,11 +97,16 @@ export default function AddRecipeIngredients({ onBack }: AddRecipeIngredientsPro
                   <p className="font-data text-on-surface-variant text-sm opacity-60">
                     <span className="font-bold">{ing.quantity}</span> {ing.unit} <span className="text-[10px] ml-1">{ing.metric}</span>
                   </p>
+                  {ing.isEssential && <span className="text-[9px] font-bold text-primary uppercase tracking-widest">Essential</span>}
                 </div>
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="p-2 text-on-surface-variant hover:text-primary transition-colors"><Edit2 size={18} /></button>
-                <button className="p-2 text-on-surface-variant hover:text-secondary transition-colors"><Trash2 size={18} /></button>
+                <button 
+                  onClick={() => removeIngredient(i)}
+                  className="p-2 text-on-surface-variant hover:text-secondary transition-colors"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
             </motion.div>
           ))}
@@ -89,6 +120,8 @@ export default function AddRecipeIngredients({ onBack }: AddRecipeIngredientsPro
                 className="w-full border-b-2 border-surface-container focus:border-primary bg-transparent py-4 text-lg font-sans outline-none transition-colors" 
                 placeholder="Ingredient name..." 
                 type="text" 
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
               />
             </div>
             <div className="grid grid-cols-2 gap-8">
@@ -96,18 +129,39 @@ export default function AddRecipeIngredients({ onBack }: AddRecipeIngredientsPro
                 className="w-full border-b-2 border-surface-container focus:border-primary bg-transparent py-4 text-lg font-data outline-none transition-colors" 
                 placeholder="Quantity" 
                 type="text" 
+                value={newQty}
+                onChange={(e) => setNewQty(e.target.value)}
               />
               <div className="relative flex items-center">
-                 <select className="w-full border-b-2 border-surface-container focus:border-primary bg-transparent py-4 text-lg font-sans outline-none transition-colors appearance-none pr-8">
+                 <select 
+                    className="w-full border-b-2 border-surface-container focus:border-primary bg-transparent py-4 text-lg font-sans outline-none transition-colors appearance-none pr-8"
+                    value={newUnit}
+                    onChange={(e) => setNewUnit(e.target.value)}
+                  >
                     <option>large handful</option>
                     <option>small palm</option>
                     <option>medium bulb</option>
                     <option>clove</option>
+                    <option>gram (g)</option>
                 </select>
                 <ArrowDropDown className="absolute right-0 text-on-surface-variant pointer-events-none" size={24} />
               </div>
             </div>
-            <button className="w-full py-5 rounded-2xl primary-gradient text-white font-bold text-lg shadow-xl shadow-primary/20 active:scale-[0.98] transition-all">
+            
+            <label className="flex items-center gap-3 cursor-pointer">
+                <input 
+                    type="checkbox" 
+                    checked={isEssential}
+                    onChange={(e) => setIsEssential(e.target.checked)}
+                    className="w-5 h-5 rounded border-surface-container text-primary focus:ring-primary"
+                />
+                <span className="text-sm font-medium text-on-surface-variant">Mark as Essential Ingredient</span>
+            </label>
+
+            <button 
+                onClick={handleAddIngredient}
+                className="w-full py-5 rounded-2xl primary-gradient text-white font-bold text-lg shadow-xl shadow-primary/20 active:scale-[0.98] transition-all"
+            >
                Add Ingredient
             </button>
           </div>

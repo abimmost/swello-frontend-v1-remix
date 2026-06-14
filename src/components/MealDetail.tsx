@@ -205,7 +205,7 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
                 {activeTab === tab && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-tertiary rounded-full -z-10 shadow-lg shadow-primary/40 brightness-110"
+                    className="absolute inset-0 bg-secondary rounded-full -z-10 shadow-lg shadow-secondary/30"
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                   />
                 )}

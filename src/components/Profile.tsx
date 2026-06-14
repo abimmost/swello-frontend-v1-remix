@@ -7,27 +7,35 @@ import { getSupabase } from '../lib/supabase';
 export default function Profile() {
   const [profile, setProfile] = useState<any>(null);
   const [bookmarks, setBookmarks] = useState<any[]>([]);
+  const [nutritionBalance, setNutritionBalance] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [refreshKey, setRefreshKey] = useState(0);
+  const [silentLoading, setSilentLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
+        if (!profile) setLoading(true);
+        else setSilentLoading(true);
+
         setError(null);
-        const [profileData, bookmarksData] = await Promise.all([
+        const today = new Date().toISOString().split('T')[0];
+        const [profileData, bookmarksData, mealPlanData] = await Promise.all([
           api.getMe(),
-          api.getBookmarks()
+          api.getBookmarks(),
+          api.getMealPlan(today, today)
         ]);
         setProfile(profileData);
         setBookmarks(bookmarksData);
+        setNutritionBalance(mealPlanData.weekly_nutrition_balance);
       } catch (err: any) {
         console.error(err);
         setError(err.message || 'Failed to connect to the Swello server.');
       } finally {
         setLoading(false);
+        setSilentLoading(false);
       }
     };
 
@@ -50,9 +58,9 @@ export default function Profile() {
   };
 
   const stats = [
-    { label: 'Protein', value: '65%', color: 'bg-primary' },
-    { label: 'Carbs', value: '42%', color: 'bg-secondary' },
-    { label: 'Fats', value: '28%', color: 'bg-tertiary' },
+    { label: 'Protein', value: `${Math.round(nutritionBalance?.protein_percentage || 0)}%`, color: 'bg-primary' },
+    { label: 'Carbs', value: `${Math.round(nutritionBalance?.carb_percentage || 0)}%`, color: 'bg-secondary' },
+    { label: 'Fats', value: `${Math.round(nutritionBalance?.fat_percentage || 0)}%`, color: 'bg-tertiary' },
   ];
 
   if (loading) {
@@ -69,6 +77,7 @@ export default function Profile() {
       <header className="bg-white/70 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 border-b border-surface-container/30">
         <h1 className="font-headline text-2xl text-secondary font-bold">Profile</h1>
         <div className="flex items-center gap-4">
+          {silentLoading && <Loader2 size={16} className="animate-spin text-primary opacity-50" />}
           <button 
             onClick={handleLogout}
             className="text-on-surface-variant hover:text-error transition-colors"
@@ -105,11 +114,11 @@ export default function Profile() {
           </span>
         </section>
 
-        {/* Today's Nutrition Card (Simulated for profile view) */}
+        {/* Today's Nutrition Card */}
         <section className="bg-white rounded-2xl p-8 shadow-sm border border-surface-container/30">
           <div className="flex justify-between items-baseline mb-8">
             <h3 className="font-headline text-2xl text-secondary font-bold">Today's Nutrition</h3>
-            <span className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Estimated</span>
+            <span className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Live Data</span>
           </div>
           
           <div className="space-y-6 mb-8">
@@ -133,7 +142,7 @@ export default function Profile() {
           
           <div className="pt-6 border-t border-surface-container">
             <p className="text-sm text-on-surface-variant">
-              Avg Balanced Level today: <span className="font-data text-2xl text-primary align-middle ml-2 font-bold">78/100</span>
+              Avg Balanced Level today: <span className="font-data text-2xl text-primary align-middle ml-2 font-bold">{Math.round(nutritionBalance?.score || 0)}/100</span>
             </p>
           </div>
         </section>

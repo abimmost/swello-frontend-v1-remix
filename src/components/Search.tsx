@@ -133,13 +133,32 @@ export default function SearchScreen({ onSelectRecipe }: SearchScreenProps) {
     setSelectedIngredients(selectedIngredients.filter(i => i.id !== id));
   };
 
-  const toggleTag = (tagName: string) => {
-    // If tag exists in selectedIngredients, remove it, else add it (using a mock ID for tags if needed, or searching by name)
+  const toggleTag = async (tagName: string) => {
+    // If tag exists in selectedIngredients, remove it
     const existing = selectedIngredients.find(i => i.name.toLowerCase() === tagName.toLowerCase());
     if (existing) {
       removeIngredient(existing.id);
-    } else {
+      return;
+    }
+
+    // Otherwise, try to find a real ingredient ID from the API first
+    try {
+      setLoading(true);
+      const results = await api.getIngredients(tagName, 5);
+      // Find the best match
+      const bestMatch = results.find((r: any) => r.name.toLowerCase() === tagName.toLowerCase()) || results[0];
+      
+      if (bestMatch) {
+        addIngredient(bestMatch);
+      } else {
+        // Fallback to mock ID if no match found (though unlikely for suggested tags)
+        addIngredient({ id: `tag-${tagName}`, name: tagName });
+      }
+    } catch (err) {
+      console.warn('Failed to resolve ingredient tag:', err);
       addIngredient({ id: `tag-${tagName}`, name: tagName });
+    } finally {
+      setLoading(false);
     }
   };
 
