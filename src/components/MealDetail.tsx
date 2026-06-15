@@ -30,7 +30,7 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
         const data = await api.getRecipe(initialRecipe.id);
         const mealRaw = data.meals || data.meal || {};
         const meal = Array.isArray(mealRaw) ? (mealRaw[0] || {}) : mealRaw;
-        const nutrientsRaw = data.nutrient_profiles || data.nutrient_profile || {};
+        const nutrientsRaw = data.nutrient_profiles || data.nutrient_profile || meal.nutrient_profiles || meal.nutrient_profile || {};
         const nutrients = Array.isArray(nutrientsRaw) ? (nutrientsRaw[0] || {}) : nutrientsRaw;
 
         const mapped: Recipe = {
@@ -156,8 +156,8 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
             {[
               { icon: Clock, label: recipe.time },
               { icon: BarChart, label: recipe.difficulty },
-            ].map(({ icon: Icon, label }) => (
-              <span key={label} className="px-4 py-1.5 rounded-full flex items-center gap-1.5 bg-background">
+            ].map(({ icon: Icon, label }, i) => (
+              <span key={`meta-${i}`} className="px-4 py-1.5 rounded-full flex items-center gap-1.5 bg-background">
                 <Icon size={14} className="text-primary/60" />
                 <span className="text-sm font-semibold">{label}</span>
               </span>
@@ -192,8 +192,8 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
             </div>
             {/* Legend */}
             <div className="flex-1 flex flex-col gap-3">
-              {nutritionItems.map((item) => (
-                <div key={item.label} className="flex items-center justify-between">
+              {nutritionItems.map((item, i) => (
+                <div key={`nut-${i}`} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
                     <span className="text-sm font-medium">{item.label}</span>

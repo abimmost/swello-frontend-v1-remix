@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { Calendar as CalendarIcon, CheckCircle, PlusCircle, Utensils as Restaurant, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { api } from '../api';
+import { openRecipeDetail } from '../utils';
 
 const formatDateLocal = (date: Date) => {
   const year = date.getFullYear();
@@ -38,6 +39,7 @@ export default function Plan() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [silentLoading, setSilentLoading] = useState(false);
   const [completedMealIds, setCompletedMealIds] = useState<Set<string>>(new Set());
+  const [deleteConfirmMealId, setDeleteConfirmMealId] = useState<string | null>(null);
 
   // Load completed status from localStorage
   useEffect(() => {
@@ -310,7 +312,8 @@ export default function Plan() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             key={pm.id} 
-                            className="bg-white rounded-3xl p-5 flex gap-5 items-center shadow-xl shadow-black/[0.02] border border-surface-container/30 relative overflow-hidden group"
+                            onClick={() => openRecipeDetail(pm)}
+                            className="bg-white rounded-3xl p-5 flex gap-5 items-center shadow-xl shadow-black/[0.02] border border-surface-container/30 relative overflow-hidden group cursor-pointer"
                           >
                             <div className="absolute top-0 left-0 w-1.5 h-full bg-primary/20 group-hover:bg-primary transition-colors" />
                             <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 shadow-md relative">
@@ -338,7 +341,10 @@ export default function Plan() {
                                      </span>
                                    )}
                                    <button 
-                                     onClick={() => toggleMealComplete(pm.id, pm.status || (completedMealIds.has(pm.id) ? 'prepared' : 'pending'))}
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       toggleMealComplete(pm.id, pm.status || (completedMealIds.has(pm.id) ? 'prepared' : 'pending'))
+                                     }}
                                      className={`${pm.status === 'prepared' || completedMealIds.has(pm.id) ? 'text-primary' : 'text-on-surface-variant/20'} hover:scale-110 transition-all`}
                                    >
                                      <CheckCircle 
@@ -358,12 +364,9 @@ export default function Plan() {
                                   </div>
                                 </div>
                                 <button 
-                                  onClick={async () => {
-                                    try {
-                                      await api.deletePlannedMeal(pm.id);
-                                      // Refresh the current week
-                                      setRefreshKey(k => k + 1);
-                                    } catch (err) { console.error(err); }
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteConfirmMealId(pm.id);
                                   }}
                                   className="text-error/30 hover:text-error transition-colors p-1"
                                 >
@@ -386,14 +389,47 @@ export default function Plan() {
                   <span className="font-headline font-bold text-primary">Schedule another meal</span>
                 </button>
                 
-                <p className="text-[11px] text-on-surface-variant italic opacity-60 text-center px-10 leading-relaxed font-medium">
-                  Nutrition thresholds calculated using <span className="font-bold text-primary">Balanced Level Score</span> algorithm v1.4.
-                </p>
               </div>
             </section>
           </>
         )}
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmMealId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full relative z-50"
+          >
+            <h3 className="font-headline text-xl font-bold text-on-surface mb-2">Remove from plan?</h3>
+            <p className="text-on-surface-variant text-sm mb-6">Are you sure you want to remove this meal from your meal plan?</p>
+            <div className="flex gap-3 justify-end">
+              <button 
+                onClick={() => setDeleteConfirmMealId(null)}
+                className="px-5 py-2.5 rounded-xl font-bold text-sm text-on-surface-variant hover:bg-surface-container transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  try {
+                    await api.deletePlannedMeal(deleteConfirmMealId);
+                    setDeleteConfirmMealId(null);
+                    setRefreshKey(k => k + 1);
+                  } catch (err) {
+                    console.error('Failed to delete meal', err);
+                  }
+                }}
+                className="px-5 py-2.5 rounded-xl font-bold text-sm bg-error text-white hover:bg-error/90 transition-colors shadow-md"
+              >
+                Remove
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

@@ -191,14 +191,11 @@ export default function App() {
         <div className="w-full h-full overflow-y-auto">
           <div style={{ display: isTabActive('discovery') ? 'block' : 'none' }}>
             <DiscoveryFeed 
-              onSelectRecipe={handleSelectRecipe} 
               onNavigate={handleNavigate}
             />
           </div>
           <div style={{ display: isTabActive('search') ? 'block' : 'none' }}>
-            <SearchScreen 
-              onSelectRecipe={handleSelectRecipe}
-            />
+            <SearchScreen />
           </div>
           <div style={{ display: isTabActive('plan') ? 'block' : 'none' }}>
             <Plan />
@@ -227,7 +224,6 @@ export default function App() {
             {currentScreen === 'your-recipes' && (
               <YourRecipesList 
                 onBack={handleBack} 
-                onSelectRecipe={handleSelectRecipe}
               />
             )}
 

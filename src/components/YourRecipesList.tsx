@@ -1,30 +1,37 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { Recipe } from '../types';
-import { getScoreColor } from '../utils';
+import { getScoreColor, openRecipeDetail } from '../utils';
 import { api } from '../api';
 
 interface YourRecipesListProps {
   onBack: () => void;
-  onSelectRecipe: (recipe: Recipe) => void;
 }
 
-export default function YourRecipesList({ onBack, onSelectRecipe }: YourRecipesListProps) {
-  const [bookmarks, setBookmarks] = useState<any[]>([]);
-  const [editedRecipes, setEditedRecipes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+let cachedBookmarksData: any[] | null = null;
+let cachedEditedData: any[] | null = null;
+let lastRecipesFetchTime = 0;
+
+export default function YourRecipesList({ onBack }: YourRecipesListProps) {
+  const [bookmarks, setBookmarks] = useState<any[]>(cachedBookmarksData || []);
+  const [editedRecipes, setEditedRecipes] = useState<any[]>(cachedEditedData || []);
+  const [loading, setLoading] = useState(!cachedBookmarksData);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
-        const [bookmarksData, editedData] = await Promise.all([
-          api.getBookmarks().catch(() => []),
-          api.getUserRecipes().catch(() => [])
-        ]);
-        setBookmarks(bookmarksData);
-        setEditedRecipes(editedData);
+        if (!cachedBookmarksData || Date.now() - lastRecipesFetchTime > 60000) {
+          if (!cachedBookmarksData) setLoading(true);
+          const [bookmarksData, editedData] = await Promise.all([
+            api.getBookmarks().catch(() => []),
+            api.getUserRecipes().catch(() => [])
+          ]);
+          cachedBookmarksData = bookmarksData;
+          cachedEditedData = editedData;
+          lastRecipesFetchTime = Date.now();
+          setBookmarks(bookmarksData);
+          setEditedRecipes(editedData);
+        }
       } catch (err) {
         console.error('Failed to fetch recipes lists', err);
       } finally {
@@ -51,7 +58,7 @@ export default function YourRecipesList({ onBack, onSelectRecipe }: YourRecipesL
             <div 
               key={`${recipe.id || meal.id}-${i}`} 
               className="space-y-3 cursor-pointer group"
-              onClick={() => onSelectRecipe(recipe)}
+              onClick={() => openRecipeDetail(item)}
             >
               <div className="aspect-square rounded-2xl overflow-hidden bg-surface-container relative shadow-lg">
                 <img 

@@ -4,13 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Recipe } from '../types';
 import { api } from '../api';
 import AddToPlanModal from './AddToPlanModal';
-import { getScoreColor } from '../utils';
+import { getScoreColor, openRecipeDetail } from '../utils';
 
-interface SearchScreenProps {
-  onSelectRecipe: (recipe: Recipe) => void;
-}
-
-export default function SearchScreen({ onSelectRecipe }: SearchScreenProps) {
+export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
@@ -307,7 +303,7 @@ export default function SearchScreen({ onSelectRecipe }: SearchScreenProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 whileHover={{ y: -5 }}
-                onClick={() => onSelectRecipe(recipe)}
+                onClick={() => openRecipeDetail(recipe)}
                 className="cursor-pointer group"
               >
                 <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-surface-container-high mb-4 shadow-lg">

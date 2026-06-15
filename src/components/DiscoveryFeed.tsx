@@ -4,9 +4,9 @@ import { Recipe, Screen } from '../types';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '../api';
 import AddToPlanModal from './AddToPlanModal';
+import { openRecipeDetail } from '../utils';
 
 interface DiscoveryFeedProps {
-  onSelectRecipe: (recipe: Recipe) => void;
   onNavigate: (screen: Screen) => void;
 }
 
@@ -19,7 +19,7 @@ const RecipeSkeleton = () => (
   </div>
 );
 
-export default function DiscoveryFeed({ onSelectRecipe, onNavigate }: DiscoveryFeedProps) {
+export default function DiscoveryFeed({ onNavigate }: DiscoveryFeedProps) {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -194,7 +194,7 @@ export default function DiscoveryFeed({ onSelectRecipe, onNavigate }: DiscoveryF
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: (index % PAGE_SIZE) * 0.05 }}
-                  onClick={() => onSelectRecipe(recipe)}
+                  onClick={() => openRecipeDetail(recipe)}
                   className="flex flex-col gap-4 group cursor-pointer"
                 >
                   <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-surface-container-high shadow-sm group-hover:shadow-md transition-shadow">
