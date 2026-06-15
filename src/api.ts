@@ -1,5 +1,6 @@
 
 import { getSupabase } from './lib/supabase';
+import { logger } from './lib/logger';
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '') || 'https://marisela-falsifiable-ridiculously.ngrok-free.dev';
 
@@ -10,7 +11,7 @@ const getHeaders = async () => {
     const { data: { session } } = await client.auth.getSession();
     token = session?.access_token;
   } catch (err) {
-    console.warn('Could not get session token (Supabase not initialized):', err);
+    logger.warn('Could not get session token (Supabase not initialized):', err);
   }
   
   const headers: Record<string, string> = {
