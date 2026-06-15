@@ -168,10 +168,6 @@ export default function Plan() {
         <h1 className="font-headline text-2xl text-secondary font-bold">Plan</h1>
         <div className="flex items-center gap-4">
           {silentLoading && <Loader2 size={16} className="animate-spin text-primary opacity-50" />}
-          <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest opacity-60 hidden sm:block">
-            {weekRangeLabel}
-          </span>
-          <CalendarIcon className="text-primary cursor-pointer hover:scale-110 transition-transform" size={24} />
         </div>
       </header>
 

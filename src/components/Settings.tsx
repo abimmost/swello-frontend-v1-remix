@@ -126,7 +126,7 @@ export default function Settings({ onBack }: SettingsProps) {
       </main>
 
       {/* Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 w-full p-6 bg-white/70 backdrop-blur-xl border-t border-surface-container/30 z-50">
+      <div className="fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 p-6 bg-white/70 backdrop-blur-xl border-t border-surface-container/30 z-50">
         <button 
           onClick={handleSave}
           disabled={isSaving || isSaved}
