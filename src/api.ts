@@ -186,16 +186,29 @@ export const api = {
 
   // AI & Nutrition
   editRecipeAI: async (data: { recipe_id: string; intended_change: string }) => {
-    const res = await fetch(`${BASE_URL}/ai/recipe-edit`, {
-      method: 'POST',
-      headers: await getHeaders(),
-      body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to edit recipe with AI');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+    try {
+      const res = await fetch(`${BASE_URL}/ai/recipe-edit`, {
+        method: 'POST',
+        headers: await getHeaders(),
+        body: JSON.stringify(data),
+        signal: controller.signal
+      });
+      if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || 'Failed to edit recipe with AI');
+      }
+      return await res.json();
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        throw new Error('The AI chef took too long to analyze. Please try again.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
     }
-    return res.json();
   },
   calculateNutritionAI: async (ingredients: any[]) => {
     const res = await fetch(`${BASE_URL}/ai/nutrition/calculate`, {

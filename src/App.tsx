@@ -140,6 +140,38 @@ export default function App() {
     };
   }, []);
 
+  // Global Pull-to-Refresh Handler
+  useEffect(() => {
+    let startY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      const scrollable = target.closest('.overflow-y-auto, .overflow-y-scroll, body') || document.documentElement;
+      if (scrollable.scrollTop <= 0) {
+        startY = e.touches[0].pageY;
+      } else {
+        startY = 0;
+      }
+    };
+    
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (startY === 0) return;
+      const target = e.target as HTMLElement;
+      const scrollable = target.closest('.overflow-y-auto, .overflow-y-scroll, body') || document.documentElement;
+      
+      if (scrollable.scrollTop <= 0 && e.changedTouches[0].pageY - startY > 150) {
+        window.location.reload();
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []);
+
   const handleNavigate = (screen: Screen) => {
     setNavigationHistory((prev) => [...prev, screen]);
     setCurrentScreen(screen);

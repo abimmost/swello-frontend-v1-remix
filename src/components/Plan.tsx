@@ -418,7 +418,7 @@ export default function Plan() {
                     console.error('Failed to delete meal', err);
                   }
                 }}
-                className="px-5 py-2.5 rounded-xl font-bold text-sm bg-error text-white hover:bg-error/90 transition-colors shadow-md"
+                className="px-5 py-2.5 rounded-xl font-bold text-sm bg-red-600 text-white hover:bg-red-700 transition-colors shadow-md"
               >
                 Remove
               </button>
