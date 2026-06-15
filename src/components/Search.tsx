@@ -171,6 +171,8 @@ export default function SearchScreen() {
         <div className="relative group">
           <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors" size={20} />
           <input 
+            id="search-meal-query"
+            name="search-meal-query"
             className="w-full bg-white border-none rounded-full py-5 pl-14 pr-6 shadow-xl shadow-black/[0.03] focus:ring-2 focus:ring-primary/10 text-sm placeholder:text-on-surface-variant/40" 
             placeholder="Search by meal name..." 
             type="text" 
@@ -188,6 +190,8 @@ export default function SearchScreen() {
           <div className="relative" ref={suggestionsRef}>
             <div className="border-b-2 border-surface-container-high py-2 relative group">
               <input 
+                id="search-ingredient-query"
+                name="search-ingredient-query"
                 className="w-full bg-transparent border-none outline-none text-xl font-headline placeholder:text-on-surface-variant/20 italic" 
                 placeholder="Enter ingredient here..." 
                 type="text" 

@@ -57,6 +57,8 @@ export default function Auth({ onSuccess }: AuthProps) {
             <Mail size={16} /> Email Address
           </label>
           <input
+            id="auth-email"
+            name="auth-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -71,6 +73,8 @@ export default function Auth({ onSuccess }: AuthProps) {
             <Lock size={16} /> Password
           </label>
           <input
+            id="auth-password"
+            name="auth-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

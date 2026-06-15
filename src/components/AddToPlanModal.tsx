@@ -76,6 +76,8 @@ export default function AddToPlanModal({ mealId, mealName, onClose, onSuccess }:
               <div className="relative group">
                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors" size={18} />
                 <input
+                  id="plan-date"
+                  name="plan-date"
                   type="date"
                   required
                   value={date}
@@ -90,6 +92,8 @@ export default function AddToPlanModal({ mealId, mealName, onClose, onSuccess }:
               <div className="relative group">
                 <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors" size={18} />
                 <input
+                  id="plan-time"
+                  name="plan-time"
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}

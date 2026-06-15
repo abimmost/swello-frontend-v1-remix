@@ -67,6 +67,8 @@ export default function Settings({ onBack }: SettingsProps) {
           <div className="space-y-2">
             <label className="text-sm font-bold text-on-surface ml-1">Email Address (Read-only)</label>
             <input 
+              id="settings-email"
+              name="settings-email"
               type="email" 
               value={email}
               readOnly
@@ -77,6 +79,8 @@ export default function Settings({ onBack }: SettingsProps) {
           <div className="space-y-2">
             <label className="text-sm font-bold text-on-surface ml-1">Full Name</label>
             <input 
+              id="settings-name"
+              name="settings-name"
               type="text" 
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -88,6 +92,8 @@ export default function Settings({ onBack }: SettingsProps) {
           <div className="space-y-2">
             <label className="text-sm font-bold text-on-surface ml-1">Bio / Journey</label>
             <textarea 
+              id="settings-bio"
+              name="settings-bio"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Tell us about your food journey"

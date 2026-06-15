@@ -117,6 +117,8 @@ export default function AddRecipeIngredients({ onBack }: AddRecipeIngredientsPro
           <div className="space-y-8">
             <div className="relative">
               <input 
+                id="ingredient-name"
+                name="ingredient-name"
                 className="w-full border-b-2 border-surface-container focus:border-primary bg-transparent py-4 text-lg font-sans outline-none transition-colors" 
                 placeholder="Ingredient name..." 
                 type="text" 
@@ -126,6 +128,8 @@ export default function AddRecipeIngredients({ onBack }: AddRecipeIngredientsPro
             </div>
             <div className="grid grid-cols-2 gap-8">
               <input 
+                id="ingredient-qty"
+                name="ingredient-qty"
                 className="w-full border-b-2 border-surface-container focus:border-primary bg-transparent py-4 text-lg font-data outline-none transition-colors" 
                 placeholder="Quantity" 
                 type="text" 
@@ -150,6 +154,8 @@ export default function AddRecipeIngredients({ onBack }: AddRecipeIngredientsPro
             
             <label className="flex items-center gap-3 cursor-pointer">
                 <input 
+                    id="ingredient-essential"
+                    name="ingredient-essential"
                     type="checkbox" 
                     checked={isEssential}
                     onChange={(e) => setIsEssential(e.target.checked)}
