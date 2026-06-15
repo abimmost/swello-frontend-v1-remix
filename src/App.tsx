@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Screen, Recipe } from './types';
 import './index.css';
@@ -11,6 +11,9 @@ import './i18n'; // Initialize i18n
 import { RECIPES } from './data';
 import { getSupabase } from './lib/supabase';
 import { api } from './api';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+
 
 // Component Imports
 import Onboarding from './components/Onboarding';
@@ -34,6 +37,47 @@ export default function App() {
   const [session, setSession] = useState<any>(null);
   const [authChecking, setAuthChecking] = useState(true);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+
+  // Track state in refs to prevent closure bugs in native listeners
+  const navHistoryRef = useRef<Screen[]>([]);
+  const handleBackRef = useRef<() => void>(() => {});
+
+  useEffect(() => {
+    navHistoryRef.current = navigationHistory;
+  }, [navigationHistory]);
+
+  useEffect(() => {
+    handleBackRef.current = handleBack;
+  }, [navigationHistory]);
+
+  // Handle native Android hardware back button
+  useEffect(() => {
+    let backListener: any = null;
+
+    const setupBackListener = async () => {
+      if (!Capacitor.isNativePlatform()) return;
+      try {
+        backListener = CapApp.addListener('backButton', () => {
+          if (navHistoryRef.current.length > 1) {
+            handleBackRef.current();
+          } else {
+            CapApp.exitApp();
+          }
+        });
+      } catch (err) {
+        console.warn('Capacitor App plugin backButton listener failed:', err);
+      }
+    };
+
+    setupBackListener();
+
+    return () => {
+      if (backListener) {
+        backListener.then((handle: any) => handle.remove()).catch(() => {});
+      }
+    };
+  }, []);
+
 
   const fetchBookmarks = async () => {
     if (!session) return;
@@ -149,8 +193,10 @@ export default function App() {
     };
   }, []);
 
-  // Global Pull-to-Refresh Handler
+  // Global Pull-to-Refresh Handler (disabled on native mobile viewports)
   useEffect(() => {
+    if (Capacitor.isNativePlatform()) return;
+
     let startY = 0;
     const handleTouchStart = (e: TouchEvent) => {
       const target = e.target as HTMLElement;
