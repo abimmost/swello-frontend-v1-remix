@@ -138,6 +138,7 @@ export default function AIEditor({ recipe: initialRecipe, onBack }: AIEditorProp
       const result = await api.createRecipe(payload);
       if (result.meal_id && result.recipe_id) {
         setIsSaved(true);
+        window.dispatchEvent(new CustomEvent('recipes-updated'));
         setTimeout(() => {
           onBack(); 
         }, 2000);
@@ -168,7 +169,7 @@ export default function AIEditor({ recipe: initialRecipe, onBack }: AIEditorProp
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-x-0 top-0 bottom-[40%] bg-surface/80 backdrop-blur-[2px] z-40 rounded-3xl pointer-events-none"
+              className="absolute inset-0 bg-surface/80 backdrop-blur-[2px] z-40 rounded-3xl pointer-events-none"
             />
           )}
         </AnimatePresence>

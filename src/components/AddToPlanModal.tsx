@@ -82,7 +82,8 @@ export default function AddToPlanModal({ mealId, mealName, onClose, onSuccess }:
                   required
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full bg-surface-container/30 border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 text-on-surface font-medium"
+                  onClick={(e) => { try { (e.target as any).showPicker(); } catch(err) {} }}
+                  className="w-full bg-surface-container/30 border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 text-on-surface font-medium cursor-pointer"
                 />
               </div>
             </div>
@@ -97,7 +98,8 @@ export default function AddToPlanModal({ mealId, mealName, onClose, onSuccess }:
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="w-full bg-surface-container/30 border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 text-on-surface font-medium"
+                  onClick={(e) => { try { (e.target as any).showPicker(); } catch(err) {} }}
+                  className="w-full bg-surface-container/30 border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 text-on-surface font-medium cursor-pointer"
                 />
               </div>
             </div>

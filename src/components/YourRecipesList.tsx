@@ -17,28 +17,41 @@ export default function YourRecipesList({ onBack }: YourRecipesListProps) {
   const [editedRecipes, setEditedRecipes] = useState<any[]>(cachedEditedData || []);
   const [loading, setLoading] = useState(!cachedBookmarksData);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (!cachedBookmarksData || Date.now() - lastRecipesFetchTime > 60000) {
-          if (!cachedBookmarksData) setLoading(true);
-          const [bookmarksData, editedData] = await Promise.all([
-            api.getBookmarks().catch(() => []),
-            api.getUserRecipes().catch(() => [])
-          ]);
-          cachedBookmarksData = bookmarksData;
-          cachedEditedData = editedData;
-          lastRecipesFetchTime = Date.now();
-          setBookmarks(bookmarksData);
-          setEditedRecipes(editedData);
-        }
-      } catch (err) {
-        console.error('Failed to fetch recipes lists', err);
-      } finally {
-        setLoading(false);
+  const fetchData = async (force = false) => {
+    try {
+      if (force || !cachedBookmarksData || Date.now() - lastRecipesFetchTime > 60000) {
+        if (!cachedBookmarksData) setLoading(true);
+        const [bookmarksData, editedData] = await Promise.all([
+          api.getBookmarks().catch(() => []),
+          api.getUserRecipes().catch(() => [])
+        ]);
+        cachedBookmarksData = bookmarksData;
+        cachedEditedData = editedData;
+        lastRecipesFetchTime = Date.now();
+        setBookmarks(bookmarksData);
+        setEditedRecipes(editedData);
       }
-    };
+    } catch (err) {
+      console.error('Failed to fetch recipes lists', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
+
+    const handleUpdate = () => {
+      lastRecipesFetchTime = 0; // force refetch next time
+      fetchData(true);
+    };
+
+    window.addEventListener('recipes-updated', handleUpdate);
+    window.addEventListener('bookmarks-updated', handleUpdate);
+    return () => {
+      window.removeEventListener('recipes-updated', handleUpdate);
+      window.removeEventListener('bookmarks-updated', handleUpdate);
+    };
   }, []);
 
   const renderRecipeCards = (recipes: any[]) => {
