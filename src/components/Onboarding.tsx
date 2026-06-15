@@ -1,13 +1,37 @@
 import { motion } from 'motion/react';
 import { Screen } from '../types';
+import { Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface OnboardingProps {
   onStart: (screen: Screen) => void;
 }
 
 export default function Onboarding({ onStart }: OnboardingProps) {
+  const { i18n } = useTranslation();
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem('i18nextLng', lng);
+  };
+
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="h-screen flex flex-col overflow-hidden bg-background relative">
+      {/* Language Switcher */}
+      <div className="absolute top-6 right-6 z-50">
+        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-surface-container shadow-sm">
+          <Globe size={14} className="text-on-surface-variant" />
+          <select 
+            value={i18n.language}
+            onChange={(e) => changeLanguage(e.target.value)}
+            className="bg-transparent text-xs font-bold text-on-surface outline-none cursor-pointer appearance-none pr-2"
+          >
+            <option value="en">English (EN)</option>
+            <option value="fr">Français (FR)</option>
+          </select>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="relative h-[50vh] w-full overflow-hidden shrink-0">
         <motion.img

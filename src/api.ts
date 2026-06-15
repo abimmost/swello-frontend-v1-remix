@@ -17,6 +17,7 @@ const getHeaders = async () => {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'ngrok-skip-browser-warning': '69420',
+    'Accept-Language': localStorage.getItem('i18nextLng') || 'en',
   };
   
   if (token) {

@@ -129,6 +129,10 @@ export default function AIEditor({ recipe: initialRecipe, onBack }: AIEditorProp
         protein_grams: aiResponse.macro_shift?.new_protein_g,
         carb_grams: aiResponse.macro_shift?.new_carb_g,
         fat_grams: aiResponse.macro_shift?.new_fat_g,
+        title_fr: aiResponse.title_fr || `${recipe.name} (Modifié par IA)`,
+        description_fr: aiResponse.description_fr ? `${aiResponse.description_fr}\n\n--- ANALYSE IA ---\n\n${JSON.stringify(aiResponse.insights_fr || [])}` : undefined,
+        steps_fr: aiResponse.adjusted_steps_fr || [],
+        cookware_fr: aiResponse.adjusted_cookware_fr || []
       };
 
       const result = await api.createRecipe(payload);

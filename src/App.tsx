@@ -6,6 +6,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Screen, Recipe } from './types';
+import './index.css';
+import './i18n'; // Initialize i18n
 import { RECIPES } from './data';
 import { getSupabase } from './lib/supabase';
 import { api } from './api';

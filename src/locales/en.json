@@ -1,0 +1,27 @@
+{
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "welcomeSub": "Continuing your flavor journey.",
+    "join": "Join Swello",
+    "joinSub": "Start your Cameroonian harvest.",
+    "email": "Email Address",
+    "password": "Password",
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "switchSignUp": "Don't have an account? Sign Up",
+    "switchSignIn": "Already have an account? Sign In",
+    "emailCheck": "Check your email for the confirmation link!"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Your Profile",
+    "emailLabel": "Email Address (Read-only)",
+    "nameLabel": "Full Name",
+    "namePlaceholder": "e.g. Chef Claude",
+    "bioLabel": "Bio / Journey",
+    "bioPlaceholder": "Tell us about your food journey",
+    "save": "Save Settings",
+    "saved": "Saved!",
+    "language": "Language"
+  }
+}

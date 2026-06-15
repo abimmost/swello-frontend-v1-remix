@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Save, Loader2, User } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, User, Globe } from 'lucide-react';
 import { getSupabase } from '../lib/supabase';
+import { useTranslation } from 'react-i18next';
 
 interface SettingsProps {
   onBack: () => void;
@@ -13,6 +14,7 @@ export default function Settings({ onBack }: SettingsProps) {
   const [description, setDescription] = useState('Flavorful Cameroonian Journey');
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -44,6 +46,11 @@ export default function Settings({ onBack }: SettingsProps) {
     setTimeout(() => setIsSaved(false), 2000);
   };
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem('i18nextLng', lng);
+  };
+
   return (
     <div className="min-h-screen bg-background pb-32">
        {/* TopAppBar */}
@@ -51,7 +58,7 @@ export default function Settings({ onBack }: SettingsProps) {
         <button onClick={onBack} className="active:scale-90 transition-transform">
           <ArrowLeft className="text-primary" size={24} />
         </button>
-        <h1 className="font-headline text-xl font-bold text-primary tracking-tight">Settings</h1>
+        <h1 className="font-headline text-xl font-bold text-primary tracking-tight">{t('settings.title')}</h1>
         <div className="w-6" /> {/* Spacer */}
       </header>
 
@@ -60,12 +67,12 @@ export default function Settings({ onBack }: SettingsProps) {
           <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary relative overflow-hidden ring-4 ring-primary/5">
             <User size={40} />
           </div>
-          <p className="text-xs font-bold text-on-surface-variant/50 uppercase tracking-widest">Your Profile</p>
+          <p className="text-xs font-bold text-on-surface-variant/50 uppercase tracking-widest">{t('settings.profile')}</p>
         </div>
 
         <div className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-on-surface ml-1">Email Address (Read-only)</label>
+            <label className="text-sm font-bold text-on-surface ml-1">{t('settings.emailLabel')}</label>
             <input 
               id="settings-email"
               name="settings-email"
@@ -77,29 +84,43 @@ export default function Settings({ onBack }: SettingsProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-on-surface ml-1">Full Name</label>
+            <label className="text-sm font-bold text-on-surface ml-1">{t('settings.nameLabel')}</label>
             <input 
               id="settings-name"
               name="settings-name"
               type="text" 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Chef Claude"
+              placeholder={t('settings.namePlaceholder')}
               className="w-full bg-white text-on-surface rounded-2xl px-5 py-4 font-medium border border-surface-container/50 focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-on-surface ml-1">Bio / Journey</label>
+            <label className="text-sm font-bold text-on-surface ml-1">{t('settings.bioLabel')}</label>
             <textarea 
               id="settings-bio"
               name="settings-bio"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Tell us about your food journey"
+              placeholder={t('settings.bioPlaceholder')}
               rows={3}
               className="w-full bg-white text-on-surface rounded-2xl px-5 py-4 font-medium border border-surface-container/50 focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-sm resize-none"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-on-surface ml-1 flex items-center gap-2">
+              <Globe size={16} /> {t('settings.language')}
+            </label>
+            <select 
+              value={i18n.language}
+              onChange={(e) => changeLanguage(e.target.value)}
+              className="w-full bg-white text-on-surface rounded-2xl px-5 py-4 font-medium border border-surface-container/50 focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-sm"
+            >
+              <option value="en">English</option>
+              <option value="fr">Français</option>
+            </select>
           </div>
         </div>
       </main>
@@ -111,7 +132,7 @@ export default function Settings({ onBack }: SettingsProps) {
           disabled={isSaving || isSaved}
           className="w-full primary-gradient text-white py-4 rounded-xl font-bold shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          {isSaving ? <Loader2 className="animate-spin" size={20} /> : isSaved ? 'Saved!' : 'Save Settings'}
+          {isSaving ? <Loader2 className="animate-spin" size={20} /> : isSaved ? t('settings.saved') : t('settings.save')}
         </button>
       </div>
     </div>

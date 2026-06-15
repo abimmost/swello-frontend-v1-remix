@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { motion } from 'motion/react';
 import { getSupabase } from '../lib/supabase';
 import { Loader2, Mail, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface AuthProps {
   onSuccess: () => void;
@@ -13,6 +14,7 @@ export default function Auth({ onSuccess }: AuthProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const handleAuth = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,7 +32,7 @@ export default function Auth({ onSuccess }: AuthProps) {
           password,
         });
         if (error) throw error;
-        alert('Check your email for the confirmation link!');
+        alert(t('auth.emailCheck'));
       }
       onSuccess();
     } catch (err: any) {
@@ -44,17 +46,17 @@ export default function Auth({ onSuccess }: AuthProps) {
     <div className="min-h-screen flex flex-col p-6 pt-20 bg-background">
       <div className="mb-12">
         <h1 className="text-4xl font-headline font-black text-secondary mb-2">
-          {isLogin ? 'Welcome Back' : 'Join Swello'}
+          {isLogin ? t('auth.welcomeBack') : t('auth.join')}
         </h1>
         <p className="text-on-surface-variant italic">
-          {isLogin ? 'Continuing your flavor journey.' : 'Start your Cameroonian harvest.'}
+          {isLogin ? t('auth.welcomeSub') : t('auth.joinSub')}
         </p>
       </div>
 
       <form onSubmit={handleAuth} className="space-y-6">
         <div className="space-y-2">
           <label className="text-sm font-bold text-on-surface-variant flex items-center gap-2">
-            <Mail size={16} /> Email Address
+            <Mail size={16} /> {t('auth.email')}
           </label>
           <input
             id="auth-email"
@@ -70,7 +72,7 @@ export default function Auth({ onSuccess }: AuthProps) {
 
         <div className="space-y-2">
           <label className="text-sm font-bold text-on-surface-variant flex items-center gap-2">
-            <Lock size={16} /> Password
+            <Lock size={16} /> {t('auth.password')}
           </label>
           <input
             id="auth-password"
@@ -95,7 +97,7 @@ export default function Auth({ onSuccess }: AuthProps) {
           disabled={loading}
           className="w-full vibrant-gradient text-white py-4 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"
         >
-          {loading ? <Loader2 className="animate-spin" size={20} /> : (isLogin ? 'Sign In' : 'Create Account')}
+          {loading ? <Loader2 className="animate-spin" size={20} /> : (isLogin ? t('auth.signIn') : t('auth.createAccount'))}
         </button>
       </form>
 
@@ -104,7 +106,7 @@ export default function Auth({ onSuccess }: AuthProps) {
           onClick={() => setIsLogin(!isLogin)}
           className="text-primary font-bold text-sm border-b border-primary/30 pb-0.5"
         >
-          {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'}
+          {isLogin ? t('auth.switchSignUp') : t('auth.switchSignIn')}
         </button>
       </div>
     </div>
