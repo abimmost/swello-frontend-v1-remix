@@ -85,13 +85,17 @@ export default function Profile() {
         <h1 className="font-headline text-2xl text-secondary font-bold">Profile</h1>
         <div className="flex items-center gap-4">
           {silentLoading && <Loader2 size={16} className="animate-spin text-primary opacity-50" />}
+          <Settings 
+            onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'settings' }))}
+            className="text-primary cursor-pointer hover:rotate-90 transition-transform duration-500" 
+            size={24} 
+          />
           <button 
             onClick={handleLogout}
             className="text-on-surface-variant hover:text-error transition-all duration-300 hover:scale-110 active:scale-95"
           >
             <LogOut size={22} className="hover:-rotate-12 transition-transform duration-300" />
           </button>
-          <Settings className="text-primary cursor-pointer hover:rotate-90 transition-transform duration-500" size={24} />
         </div>
       </header>
 

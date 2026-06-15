@@ -22,6 +22,7 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
   const [isBookmarking, setIsBookmarking] = useState(false);
   const [isAddingToPlan, setIsAddingToPlan] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const fetchFullRecipe = async () => {
@@ -96,7 +97,11 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
     setShowPlanModal(true);
   };
 
-  const handleDeleteAiRecipe = async () => {
+  const handleDeleteAiRecipe = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
     try {
       setIsBookmarking(true); // Reusing this for loading state
       const id = recipe.recipe_id || recipe.id;
@@ -108,8 +113,23 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
     } catch (err) {
       console.error(err);
       setIsBookmarking(false);
+      setShowDeleteConfirm(false);
     }
   };
+
+  const delimiter = '\n\n--- AI INSIGHTS ---\n\n';
+  let mainDescription = recipe.description || '';
+  let aiInsights: null | string[] = null;
+
+  if (mainDescription.includes(delimiter)) {
+    const parts = mainDescription.split(delimiter);
+    mainDescription = parts[0];
+    try {
+      aiInsights = JSON.parse(parts[1]);
+    } catch (e) {
+      console.warn('Failed to parse AI insights', e);
+    }
+  }
 
   return (
     <div className="min-h-screen pb-32">
@@ -151,7 +171,7 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
           className="bg-white rounded-3xl p-7 mb-6 shadow-sm border border-surface-container/30"
         >
           <h1 className="font-headline text-3xl font-bold text-primary mb-1">{recipe.name}</h1>
-          <p className="text-black text-sm mb-4">{recipe.description}</p>
+          <p className="text-black text-sm mb-4">{mainDescription}</p>
           <div className="flex flex-wrap gap-2">
             {[
               { icon: Clock, label: recipe.time },
@@ -164,6 +184,27 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
             ))}
           </div>
         </motion.div>
+
+        {aiInsights && (
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-primary/5 rounded-3xl p-6 mb-6 border border-primary/20 shadow-sm"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <Sparkles className="text-primary" size={20} />
+              <h2 className="font-headline font-bold text-primary text-lg">AI Editor Insights</h2>
+            </div>
+            <ul className="space-y-3">
+              {aiInsights.map((insight, i) => (
+                <li key={i} className="flex gap-3 text-sm text-on-surface">
+                  <span className="text-primary/50 mt-1 shrink-0">•</span>
+                  <span className="leading-relaxed">{insight}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.section>
+        )}
 
         {/* Nutrition Info Card */}
         <section className="bg-white rounded-3xl p-6 mb-8 shadow-md border border-surface-container/30">
@@ -367,6 +408,36 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
             onClose={() => setShowPlanModal(false)}
             onSuccess={() => {}}
           />
+        )}
+        
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full relative z-50"
+            >
+              <h3 className="font-headline text-xl font-bold text-on-surface mb-2">Delete Recipe?</h3>
+              <p className="text-on-surface-variant text-sm mb-6">Are you sure you want to delete this custom recipe? This cannot be undone.</p>
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-5 py-2.5 rounded-xl font-bold text-sm text-on-surface-variant hover:bg-surface-container transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmDelete}
+                  disabled={isBookmarking}
+                  className="px-5 py-2.5 rounded-xl font-bold text-sm bg-error text-white hover:bg-error/90 transition-colors shadow-md flex justify-center items-center gap-2"
+                >
+                  {isBookmarking && <Loader2 size={16} className="animate-spin" />}
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

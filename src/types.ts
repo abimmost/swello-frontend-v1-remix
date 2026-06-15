@@ -31,4 +31,4 @@ export interface Recipe {
   cookware?: string[];
 }
 
-export type Screen = 'onboarding' | 'discovery' | 'search' | 'detail' | 'plan' | 'profile' | 'editor' | 'breakdown' | 'add-ingredients' | 'your-recipes';
+export type Screen = 'onboarding' | 'discovery' | 'search' | 'detail' | 'plan' | 'profile' | 'editor' | 'breakdown' | 'add-ingredients' | 'your-recipes' | 'settings';

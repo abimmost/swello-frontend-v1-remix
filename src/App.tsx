@@ -17,6 +17,7 @@ import SearchScreen from './components/Search';
 import MealDetail from './components/MealDetail';
 import Plan from './components/Plan';
 import Profile from './components/Profile';
+import Settings from './components/Settings';
 import YourRecipesList from './components/YourRecipesList';
 import NutrientBreakdown from './components/NutrientBreakdown';
 import AIEditor from './components/AIEditor';
@@ -208,7 +209,7 @@ export default function App() {
 
       <AnimatePresence mode="wait">
         {/* Layered screens (Not pre-loaded) */}
-        {['onboarding', 'detail', 'breakdown', 'editor', 'add-ingredients', 'your-recipes'].includes(currentScreen) && (
+        {['onboarding', 'detail', 'breakdown', 'editor', 'add-ingredients', 'your-recipes', 'settings'].includes(currentScreen) && (
           <motion.div
             key={currentScreen}
             initial={{ opacity: 0, x: 20 }}
@@ -223,6 +224,12 @@ export default function App() {
 
             {currentScreen === 'your-recipes' && (
               <YourRecipesList 
+                onBack={handleBack} 
+              />
+            )}
+
+            {currentScreen === 'settings' && (
+              <Settings 
                 onBack={handleBack} 
               />
             )}

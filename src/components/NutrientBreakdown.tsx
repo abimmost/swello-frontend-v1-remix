@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { ArrowLeft, PlusCircle, Loader2 } from 'lucide-react';
 import { Recipe } from '../types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../api';
 
 interface NutrientBreakdownProps {
@@ -9,9 +9,38 @@ interface NutrientBreakdownProps {
   onBack: () => void;
 }
 
-export default function NutrientBreakdown({ recipe, onBack }: NutrientBreakdownProps) {
+export default function NutrientBreakdown({ recipe: initialRecipe, onBack }: NutrientBreakdownProps) {
   const [isLogging, setIsLogging] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
+  const [recipe, setRecipe] = useState(initialRecipe);
+
+  useEffect(() => {
+    const fetchFullRecipe = async () => {
+      try {
+        const data = await api.getRecipe(initialRecipe.id);
+        const mealRaw = data.meals || data.meal || {};
+        const meal = Array.isArray(mealRaw) ? (mealRaw[0] || {}) : mealRaw;
+        const nutrientsRaw = data.nutrient_profiles || data.nutrient_profile || meal.nutrient_profiles || meal.nutrient_profile || {};
+        const nutrients = Array.isArray(nutrientsRaw) ? (nutrientsRaw[0] || {}) : nutrientsRaw;
+        
+        setRecipe({
+          ...initialRecipe,
+          score: meal.balanced_level_score || initialRecipe.score,
+          nutrition: {
+            protein: nutrients.protein_grams || 0,
+            fat: nutrients.fat_grams || 0,
+            carbs: nutrients.carb_grams || 0,
+            fiber: nutrients.fiber_g || 0,
+            iron: nutrients.iron_mg || 0,
+            vitC: nutrients.vitamin_c_mg || 0,
+          }
+        });
+      } catch (err) {
+        console.error('Failed to load full nutrition data', err);
+      }
+    };
+    fetchFullRecipe();
+  }, [initialRecipe]);
 
   const n = recipe.nutrition || { protein: 0, fat: 0, carbs: 0, fiber: 0, iron: 0, vitC: 0 };
 
@@ -64,19 +93,34 @@ export default function NutrientBreakdown({ recipe, onBack }: NutrientBreakdownP
         {/* Hero Score */}
         <section className="flex flex-col items-center py-4">
           <div className="relative w-64 h-64 flex items-center justify-center">
-            {/* Conic Gradient Donut Simulation */}
-            <div className="absolute inset-0 rounded-full bg-surface-container flex items-center justify-center shadow-inner overflow-hidden">
-               <div 
-                  className="absolute inset-0"
-                  style={{
-                    background: `conic-gradient(#064E3B 0% ${recipe.score}%, #E5E7EB ${recipe.score}% 100%)`
-                  }}
-               />
-               <div className="absolute inset-4 bg-background rounded-full flex flex-col items-center justify-center shadow-lg border border-white/50">
-                  <span className="font-data text-5xl font-bold text-primary leading-none">{recipe.score}</span>
-                  <span className="font-data text-sm font-bold text-on-surface-variant opacity-40">/100</span>
-                  <span className="text-xs font-bold text-primary mt-2 uppercase tracking-widest">Balanced Level</span>
-               </div>
+            {(() => {
+              const totalMacros = (n.protein + n.fat + n.carbs) || 1;
+              const pPct = n.protein / totalMacros;
+              const fPct = n.fat / totalMacros;
+              const cPct = n.carbs / totalMacros;
+              
+              const circ = 2 * Math.PI * 110; // radius = 110
+              const pLen = pPct * circ;
+              const fLen = fPct * circ;
+              const cLen = cPct * circ;
+              
+              const pOffset = 0;
+              const fOffset = pLen;
+              const cOffset = pLen + fLen;
+              
+              return (
+                <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                  <circle className="text-surface-container" cx="128" cy="128" fill="transparent" r="110" stroke="currentColor" strokeWidth="24" />
+                  {pPct > 0 && <circle className="text-primary transition-all duration-1000" cx="128" cy="128" fill="transparent" r="110" stroke="currentColor" strokeDasharray={`${pLen} ${circ}`} strokeDashoffset={-pOffset} strokeLinecap="round" strokeWidth="24" />}
+                  {fPct > 0 && <circle className="text-secondary transition-all duration-1000" cx="128" cy="128" fill="transparent" r="110" stroke="currentColor" strokeDasharray={`${fLen} ${circ}`} strokeDashoffset={-fOffset} strokeLinecap="round" strokeWidth="24" />}
+                  {cPct > 0 && <circle className="text-tertiary transition-all duration-1000" cx="128" cy="128" fill="transparent" r="110" stroke="currentColor" strokeDasharray={`${cLen} ${circ}`} strokeDashoffset={-cOffset} strokeLinecap="round" strokeWidth="24" />}
+                </svg>
+              );
+            })()}
+            <div className="absolute inset-x-8 inset-y-8 bg-background rounded-full flex flex-col items-center justify-center shadow-lg border border-white/50">
+               <span className="font-data text-5xl font-bold text-primary leading-none">{recipe.score}</span>
+               <span className="font-data text-sm font-bold text-on-surface-variant opacity-40">/100</span>
+               <span className="text-xs font-bold text-primary mt-2 uppercase tracking-widest">Balanced Level</span>
             </div>
           </div>
 

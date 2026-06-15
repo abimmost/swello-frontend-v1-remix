@@ -110,7 +110,9 @@ export default function AIEditor({ recipe: initialRecipe, onBack }: AIEditorProp
       
       const payload = {
         title: `${recipe.name} (AI Modified)`,
-        description: `An AI-optimized version of ${recipe.name}. ${aiResponse.insights?.[0] || ''}`,
+        description: `An AI-optimized version of ${recipe.name}.\n\n--- AI INSIGHTS ---\n\n${JSON.stringify(aiResponse.insights || [])}`,
+        image_url: recipe.image,
+        parent_recipe_id: recipe.id,
         tags: recipe.tags, // Array of strings is expected by backend now
         duration_minutes: aiResponse.new_time || parseInt(recipe.time),
         ingredients: recipe.ingredients
@@ -122,18 +124,15 @@ export default function AIEditor({ recipe: initialRecipe, onBack }: AIEditorProp
           })),
         steps: aiResponse.adjusted_steps || recipe.steps,
         cookware: aiResponse.adjusted_cookware || recipe.cookware || [],
-        is_custom: true
+        is_custom: true,
+        balanced_level_score: aiResponse.new_score,
+        protein_grams: aiResponse.macro_shift?.new_protein_g,
+        carb_grams: aiResponse.macro_shift?.new_carb_g,
+        fat_grams: aiResponse.macro_shift?.new_fat_g,
       };
 
       const result = await api.createRecipe(payload);
       if (result.meal_id && result.recipe_id) {
-        // Also bookmark it for the user so it shows on their profile
-        try {
-          await api.bookmarkRecipe(result.recipe_id);
-        } catch (bookmarkErr) {
-          console.warn('Failed to auto-bookmark recipe:', bookmarkErr);
-        }
-        
         setIsSaved(true);
         setTimeout(() => {
           onBack(); 
@@ -150,22 +149,10 @@ export default function AIEditor({ recipe: initialRecipe, onBack }: AIEditorProp
   return (
     <div className="min-h-screen bg-surface pb-32">
       {/* Top Navigation Bar */}
-      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl h-20 flex items-center px-6 border-b border-surface-container/30">
-        <div className="flex items-center gap-4 flex-1">
-          <button onClick={onBack} className="active:scale-90 transition-transform p-2 -ml-2 rounded-full hover:bg-surface-container/20">
-            <ArrowLeft className="text-primary" size={24} />
-          </button>
-        </div>
-
+      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl h-20 flex items-center justify-center px-6 border-b border-surface-container/30">
         {/* Floating Context Pill (Centered) */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-5">
-          <div className="bg-surface-container/60 backdrop-blur-md px-7 py-3 rounded-full flex items-center gap-3 border border-surface-container/50 shadow-md transition-all">
-            <span className="text-xs md:text-base font-medium text-on-surface-variant line-clamp-1 whitespace-nowrap">Editing: <span className="font-bold text-primary">{recipe.name}</span> 🍳</span>
-          </div>
-        </div>
-
-        <div className="flex-1 flex justify-end">
-          <Sparkles size={24} fill="currentColor" className="text-primary opacity-60" />
+        <div className="bg-surface-container/60 backdrop-blur-md px-7 py-3 rounded-full flex items-center gap-3 border border-surface-container/50 shadow-md transition-all">
+          <span className="text-xs md:text-base font-medium text-on-surface-variant line-clamp-1 whitespace-nowrap">Editing: <span className="font-bold text-primary">{recipe.name}</span> 🍳</span>
         </div>
       </header>
 
