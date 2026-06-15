@@ -27,20 +27,25 @@ const getHeaders = async () => {
   return headers;
 };
 
+const handleResponse = async (res: Response, defaultError: string) => {
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      window.dispatchEvent(new CustomEvent('auth-expired'));
+    }
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || defaultError);
+  }
+  return res.json();
+};
 export const api = {
   // User & Profile
   getMe: async () => {
     const res = await fetch(`${BASE_URL}/users/me`, { headers: await getHeaders() });
-    if (!res.ok) throw new Error('Failed to fetch profile');
-    return res.json();
+    return handleResponse(res, 'Failed to fetch profile');
   },
   getUserRecipes: async () => {
     const res = await fetch(`${BASE_URL}/users/me/recipes`, { headers: await getHeaders() });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to fetch user recipes');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to fetch user recipes');
   },
   updateProfile: async (data: { display_name?: string; avatar_url?: string }) => {
     const res = await fetch(`${BASE_URL}/users/me`, {
@@ -48,40 +53,24 @@ export const api = {
       headers: await getHeaders(),
       body: JSON.stringify(data),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to update profile');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to update profile');
   },
   getBookmarks: async () => {
     const res = await fetch(`${BASE_URL}/users/me/bookmarks`, { headers: await getHeaders() });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to fetch bookmarks');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to fetch bookmarks');
   },
   removeBookmark: async (recipeId: string) => {
     const res = await fetch(`${BASE_URL}/users/me/bookmarks/${recipeId}`, {
       method: 'DELETE',
       headers: await getHeaders(),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to remove bookmark');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to remove bookmark');
   },
 
   // Recipes & Search
   getRecipes: async (limit = 10, offset = 0) => {
     const res = await fetch(`${BASE_URL}/recipes?limit=${limit}&offset=${offset}`, { headers: await getHeaders() });
-    if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.detail || `API Error: ${res.status}`);
-    }
-    return res.json();
+    return handleResponse(res, `API Error: ${res.status}`);
   },
   searchRecipes: async (q?: string, tags?: string, ingredients?: string) => {
     const params = new URLSearchParams();
@@ -89,30 +78,18 @@ export const api = {
     if (tags) params.append('tags', tags);
     if (ingredients) params.append('ingredients', ingredients);
     const res = await fetch(`${BASE_URL}/recipes/search?${params.toString()}`, { headers: await getHeaders() });
-    if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.detail || `API Error: ${res.status}`);
-    }
-    return res.json();
+    return handleResponse(res, `API Error: ${res.status}`);
   },
   getRecipe: async (id: string) => {
     const res = await fetch(`${BASE_URL}/recipes/${id}`, { headers: await getHeaders() });
-    if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.detail || `API Error: ${res.status}`);
-    }
-    return res.json();
+    return handleResponse(res, `API Error: ${res.status}`);
   },
   deleteRecipe: async (id: string) => {
     const res = await fetch(`${BASE_URL}/recipes/${id}`, {
       method: 'DELETE',
       headers: await getHeaders(),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to delete recipe');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to delete recipe');
   },
   createRecipe: async (data: any) => {
     const res = await fetch(`${BASE_URL}/recipes`, {
@@ -120,33 +97,21 @@ export const api = {
       headers: await getHeaders(),
       body: JSON.stringify(data),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to create recipe');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to create recipe');
   },
   bookmarkRecipe: async (recipeId: string) => {
     const res = await fetch(`${BASE_URL}/recipes/${recipeId}/bookmark`, {
       method: 'POST',
       headers: await getHeaders(),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to bookmark recipe');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to bookmark recipe');
   },
 
   // Meal Planning
   getMealPlan: async (startDate: string, endDate: string) => {
     const params = new URLSearchParams({ start_date: startDate, end_date: endDate });
     const res = await fetch(`${BASE_URL}/meal-plan?${params.toString()}`, { headers: await getHeaders() });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to fetch meal plan');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to fetch meal plan');
   },
   addPlannedMeal: async (data: { meal_id: string; scheduled_date: string; scheduled_time?: string }) => {
     const res = await fetch(`${BASE_URL}/meal-plan/add`, {
@@ -154,22 +119,14 @@ export const api = {
       headers: await getHeaders(),
       body: JSON.stringify(data),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to add to plan');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to add to plan');
   },
   deletePlannedMeal: async (planId: string) => {
     const res = await fetch(`${BASE_URL}/meal-plan/${planId}`, {
       method: 'DELETE',
       headers: await getHeaders(),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to delete planned meal');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to delete planned meal');
   },
   updatePlannedMealStatus: async (planId: string, status: string) => {
     const res = await fetch(`${BASE_URL}/meal-plan/${planId}/status`, {
@@ -177,11 +134,7 @@ export const api = {
       headers: await getHeaders(),
       body: JSON.stringify({ status }),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to update planned meal status');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to update planned meal status');
   },
 
   // AI & Nutrition
@@ -196,11 +149,7 @@ export const api = {
         body: JSON.stringify(data),
         signal: controller.signal
       });
-      if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.detail || 'Failed to edit recipe with AI');
-      }
-      return await res.json();
+      return handleResponse(res, 'Failed to edit recipe with AI');
     } catch (err: any) {
       if (err.name === 'AbortError') {
         throw new Error('The AI chef took too long to analyze. Please try again.');
@@ -216,11 +165,7 @@ export const api = {
       headers: await getHeaders(),
       body: JSON.stringify({ ingredients }),
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to calculate nutrition with AI');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to calculate nutrition with AI');
   },
 
   // Ingredients
@@ -229,10 +174,6 @@ export const api = {
     if (q) params.append('q', q);
     params.append('limit', limit.toString());
     const res = await fetch(`${BASE_URL}/ingredients?${params.toString()}`, { headers: await getHeaders() });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'Failed to fetch ingredients');
-    }
-    return res.json();
+    return handleResponse(res, 'Failed to fetch ingredients');
   },
 };

@@ -128,15 +128,24 @@ export default function App() {
         setNavigationHistory(prev => [...prev, screen]);
       } else if (e.type === 'select-recipe') {
         handleSelectRecipe(e.detail);
+      } else if (e.type === 'auth-expired') {
+        try {
+          getSupabase().auth.signOut();
+        } catch (err) {}
+        setSession(null);
+        setCurrentScreen('onboarding');
+        setNavigationHistory(['onboarding']);
       }
     };
     window.addEventListener('navigate-search' as any, handleGlobalNav);
     window.addEventListener('navigate' as any, handleGlobalNav);
     window.addEventListener('select-recipe' as any, handleGlobalNav);
+    window.addEventListener('auth-expired' as any, handleGlobalNav);
     return () => {
       window.removeEventListener('navigate-search' as any, handleGlobalNav);
       window.removeEventListener('navigate' as any, handleGlobalNav);
       window.removeEventListener('select-recipe' as any, handleGlobalNav);
+      window.removeEventListener('auth-expired' as any, handleGlobalNav);
     };
   }, []);
 
