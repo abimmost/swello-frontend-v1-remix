@@ -45,6 +45,7 @@ export default function MealDetail({ recipe: initialRecipe, onBack, onNavigate, 
           budget: meal.budget || 'Mid-range',
           score: meal.balanced_level_score || initialRecipe.score,
           tags: Array.isArray(meal.tags) ? meal.tags : (typeof meal.tags === 'string' ? meal.tags.split(',') : (meal.tags || [])),
+          is_ai_generated: data.is_ai_generated ?? initialRecipe.is_ai_generated,
           nutrition: {
             protein: nutrients.protein_grams || 0,
             fat: nutrients.fat_grams || 0,
