@@ -1,0 +1,27 @@
+{
+  "auth": {
+    "welcomeBack": "Content de vous revoir",
+    "welcomeSub": "Continuez votre voyage de saveurs.",
+    "join": "Rejoignez Swello",
+    "joinSub": "Commencez votre récolte camerounaise.",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "signIn": "Se connecter",
+    "createAccount": "Créer un compte",
+    "switchSignUp": "Vous n'avez pas de compte ? S'inscrire",
+    "switchSignIn": "Vous avez déjà un compte ? Se connecter",
+    "emailCheck": "Vérifiez votre e-mail pour le lien de confirmation !"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "profile": "Votre Profil",
+    "emailLabel": "Adresse e-mail (Lecture seule)",
+    "nameLabel": "Nom Complet",
+    "namePlaceholder": "ex: Chef Claude",
+    "bioLabel": "Bio / Parcours",
+    "bioPlaceholder": "Parlez-nous de votre parcours culinaire",
+    "save": "Enregistrer les paramètres",
+    "saved": "Enregistré !",
+    "language": "Langue"
+  }
+}
