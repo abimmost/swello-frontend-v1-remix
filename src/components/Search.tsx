@@ -162,7 +162,7 @@ export default function SearchScreen() {
   return (
     <div className="min-h-screen pb-32 bg-background">
       {/* Header */}
-      <header className="bg-white/70 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 border-b border-surface-container/30">
+      <header className="bg-white/70 backdrop-blur-xl fixed top-0 w-full max-w-md left-1/2 -translate-x-1/2 z-50 flex justify-between items-center px-6 h-20 border-b border-surface-container/30">
         <h1 className="font-headline text-2xl font-bold text-secondary">Search</h1>
       </header>
 

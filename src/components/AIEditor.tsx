@@ -153,7 +153,7 @@ export default function AIEditor({ recipe: initialRecipe, onBack }: AIEditorProp
   return (
     <div className="min-h-screen bg-surface pb-32">
       {/* Top Navigation Bar */}
-      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl h-20 flex items-center justify-center px-6 border-b border-surface-container/30">
+      <header className="fixed top-0 w-full max-w-md left-1/2 -translate-x-1/2 z-50 bg-white/80 backdrop-blur-xl h-20 flex items-center justify-center px-6 border-b border-surface-container/30">
         {/* Floating Context Pill (Centered) */}
         <div className="bg-surface-container/60 backdrop-blur-md px-7 py-3 rounded-full flex items-center gap-3 border border-surface-container/50 shadow-md transition-all">
           <span className="text-xs md:text-base font-medium text-on-surface-variant line-clamp-1 whitespace-nowrap">Editing: <span className="font-bold text-primary">{recipe.name}</span> 🍳</span>
@@ -382,7 +382,7 @@ export default function AIEditor({ recipe: initialRecipe, onBack }: AIEditorProp
       </main>
 
       {/* Bottom Action Bar */}
-      <footer className="fixed bottom-0 w-full glass-nav z-50 h-28 px-6 flex items-center gap-4 border-t border-surface-container/20">
+      <footer className="fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 glass-nav z-50 h-28 px-6 flex items-center gap-4 border-t border-surface-container/20">
         <button 
           onClick={onBack}
           disabled={isAnalyzing || isSaving}

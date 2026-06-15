@@ -145,7 +145,7 @@ export default function DiscoveryFeed({ onNavigate }: DiscoveryFeedProps) {
       </motion.div>
 
       {/* Header */}
-      <header className="bg-white/70 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 border-b border-surface-container/30">
+      <header className="bg-white/70 backdrop-blur-xl fixed top-0 w-full max-w-md left-1/2 -translate-x-1/2 z-50 flex justify-between items-center px-6 h-20 border-b border-surface-container/30">
         <h1 className="text-2xl font-headline font-bold text-secondary">Discovery Feed</h1>
         <button 
           onClick={() => onNavigate('search')}

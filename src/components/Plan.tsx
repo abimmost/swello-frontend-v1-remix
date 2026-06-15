@@ -164,7 +164,7 @@ export default function Plan() {
   return (
     <div className="min-h-screen pb-32 bg-background">
       {/* TopAppBar */}
-      <header className="bg-white/70 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 border-b border-surface-container/30">
+      <header className="bg-white/70 backdrop-blur-xl fixed top-0 w-full max-w-md left-1/2 -translate-x-1/2 z-50 flex justify-between items-center px-6 h-20 border-b border-surface-container/30">
         <h1 className="font-headline text-2xl text-secondary font-bold">Plan</h1>
         <div className="flex items-center gap-4">
           {silentLoading && <Loader2 size={16} className="animate-spin text-primary opacity-50" />}
