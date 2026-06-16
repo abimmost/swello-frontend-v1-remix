@@ -2,7 +2,7 @@
 import { getSupabase } from './lib/supabase';
 import { logger } from './lib/logger';
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '') || 'https://marisela-falsifiable-ridiculously.ngrok-free.dev';
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '') || 'https://swello-backend.onrender.com';
 
 const getHeaders = async () => {
   let token = null;

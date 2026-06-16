@@ -8,7 +8,8 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
     cleartext: true,
     allowNavigation: [
-      'marisela-falsifiable-ridiculously.ngrok-free.dev'
+      'marisela-falsifiable-ridiculously.ngrok-free.dev',
+      'swello-backend.onrender.com'
     ]
   }
 };
