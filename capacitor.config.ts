@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Swello',
   webDir: 'dist',
   server: {
-    androidScheme: 'http',
+    androidScheme: 'https',
+    cleartext: true,
     allowNavigation: [
       'marisela-falsifiable-ridiculously.ngrok-free.dev'
     ]
